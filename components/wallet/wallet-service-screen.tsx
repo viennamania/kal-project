@@ -257,18 +257,18 @@ export function WalletServiceScreen() {
   }
 
   return (
-    <main className="mx-auto max-w-7xl px-4 pb-10 pt-6 sm:px-6 lg:px-8">
-      <header className="mb-6 flex flex-col gap-4 rounded-[36px] border border-white/70 bg-white/70 px-5 py-4 shadow-bubble backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between">
+    <main className="mx-auto max-w-7xl px-4 pb-10 pt-4 sm:px-6 sm:pt-6 lg:px-8">
+      <header className="mb-6 flex flex-col gap-4 rounded-[32px] border border-white/70 bg-white/70 px-4 py-4 shadow-bubble backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between sm:rounded-[36px] sm:px-5">
         <div>
           <p className="text-sm font-semibold uppercase tracking-[0.22em] text-ink/45">
             {wallet.headerEyebrow}
           </p>
-          <h1 className="mt-2 font-display text-4xl text-ink">{wallet.headerTitle}</h1>
+          <h1 className="mt-2 font-display text-3xl text-ink sm:text-4xl">{wallet.headerTitle}</h1>
         </div>
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="grid w-full gap-3 sm:flex sm:w-auto sm:flex-wrap sm:items-center">
           <LanguageSwitcher />
           <Link
-            className="rounded-full border border-white/70 bg-white/70 px-4 py-2 text-sm font-semibold text-ink/80"
+            className="inline-flex min-h-12 items-center justify-center rounded-full border border-white/70 bg-white/70 px-4 py-3 text-sm font-semibold text-ink/80 sm:min-h-0 sm:py-2"
             href="/"
           >
             {nav.backToStudio}
@@ -278,8 +278,8 @@ export function WalletServiceScreen() {
       </header>
 
       <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-        <Panel className="p-6">
-          <div className="mb-5 flex items-center justify-between gap-4">
+        <Panel className="p-5 sm:p-6">
+          <div className="mb-5 flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.22em] text-ink/45">
                 {wallet.tokenListEyebrow}
@@ -310,7 +310,7 @@ export function WalletServiceScreen() {
                 className="rounded-[28px] border border-white/70 bg-white/85 p-4"
               >
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="flex items-center gap-4">
+                  <div className="flex min-w-0 items-center gap-4">
                     <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-[22px] bg-bubble">
                       {token.imageUrl ? (
                         <Image
@@ -329,12 +329,12 @@ export function WalletServiceScreen() {
                         />
                       )}
                     </div>
-                    <div>
-                      <p className="text-base font-semibold text-ink">{token.name}</p>
-                      <p className="text-sm text-ink/60">
+                    <div className="min-w-0">
+                      <p className="truncate text-base font-semibold text-ink">{token.name}</p>
+                      <p className="break-all text-sm text-ink/60 sm:break-normal">
                         {token.symbol} · {shortenAddress(token.contractAddress, 8, 6)}
                       </p>
-                      <p className="mt-1 text-xs text-ink/45">
+                      <p className="mt-1 break-words text-xs text-ink/45">
                         {home.ownerLabel}:{" "}
                         {token.owner?.displayName ?? shortenAddress(token.ownerWallet)}
                       </p>
@@ -344,7 +344,7 @@ export function WalletServiceScreen() {
                     </div>
                   </div>
 
-                  <div className="rounded-[24px] bg-bubble px-4 py-3 text-right">
+                  <div className="w-full rounded-[24px] bg-bubble px-4 py-3 text-left sm:w-auto sm:text-right">
                     <p className="text-xs uppercase tracking-[0.18em] text-ink/45">
                       {wallet.myBalanceLabel}
                     </p>
@@ -359,9 +359,9 @@ export function WalletServiceScreen() {
         </Panel>
 
         <div className="space-y-6">
-          <Panel className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
+          <Panel className="p-5 sm:p-6">
+            <div className="flex items-start justify-between gap-4">
+              <div className="min-w-0">
                 <p className="text-sm font-semibold uppercase tracking-[0.22em] text-ink/45">
                   {wallet.activeWalletEyebrow}
                 </p>
@@ -369,14 +369,14 @@ export function WalletServiceScreen() {
                   {member ? member.displayName : wallet.activeWalletLoggedOut}
                 </h2>
               </div>
-              <ShieldCheck className="h-7 w-7 text-mint" />
+              <ShieldCheck className="h-7 w-7 shrink-0 text-mint" />
             </div>
 
             <div className="mt-4 rounded-[28px] bg-bubble p-4 text-sm text-ink/70">
               {member ? (
                 <>
                   {member.maskedPhone ? <p>{member.maskedPhone}</p> : null}
-                  <p className={member.maskedPhone ? "mt-2" : undefined}>
+                  <p className={`${member.maskedPhone ? "mt-2" : ""} break-all`}>
                     {shortenAddress(member.walletAddress, 10, 6)}
                   </p>
                   <p className="mt-2 text-xs text-ink/45">{wallet.smartAccountNote}</p>
@@ -387,7 +387,7 @@ export function WalletServiceScreen() {
             </div>
           </Panel>
 
-          <Panel className="p-6">
+          <Panel className="p-5 sm:p-6">
             <div className="mb-4">
               <p className="text-sm font-semibold uppercase tracking-[0.22em] text-ink/45">
                 {wallet.sendEyebrow}
@@ -401,7 +401,7 @@ export function WalletServiceScreen() {
                   {wallet.tokenFieldLabel}
                 </label>
                 <select
-                  className="h-12 w-full rounded-3xl border border-white/70 bg-white/85 px-4 text-sm font-medium text-ink outline-none"
+                  className="h-12 w-full rounded-3xl border border-white/70 bg-white/85 px-4 text-base font-medium text-ink outline-none focus:border-sky focus:ring-4 focus:ring-sky/20 sm:text-sm"
                   onChange={(event) => setSelectedTokenAddress(event.target.value)}
                   value={selectedTokenAddress}
                 >
@@ -439,8 +439,8 @@ export function WalletServiceScreen() {
                       onClick={() => setSelectedMember(entry)}
                       type="button"
                     >
-                      <p className="text-sm font-semibold text-ink">{entry.displayName}</p>
-                      <p className="mt-1 text-xs text-ink/55">
+                      <p className="break-words text-sm font-semibold text-ink">{entry.displayName}</p>
+                      <p className="mt-1 break-all text-xs text-ink/55 sm:break-normal">
                         {entry.maskedPhone} · {shortenAddress(entry.walletAddress, 8, 6)}
                       </p>
                     </button>

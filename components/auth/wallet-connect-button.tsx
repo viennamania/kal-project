@@ -24,7 +24,7 @@ export function WalletConnectButton() {
       client={thirdwebClient}
       connectButton={{
         className:
-          "!rounded-full !bg-[#1E2451] !px-5 !py-3 !text-sm !font-semibold !text-white !shadow-[0_18px_32px_rgba(30,36,81,0.22)]"
+          "!min-h-12 !rounded-full !bg-[#1E2451] !px-5 !py-3 !text-base !font-semibold !text-white !shadow-[0_18px_32px_rgba(30,36,81,0.22)] sm:!text-sm"
       }}
       connectModal={{
         showThirdwebBranding: false,
@@ -42,7 +42,7 @@ export function WalletConnectButton() {
       }}
       detailsButton={{
         className:
-          "!rounded-full !border !border-white/70 !bg-white/85 !px-4 !py-2 !text-sm !font-semibold !text-[#1E2451] !shadow-[0_12px_22px_rgba(30,36,81,0.08)]"
+          "!min-h-12 !rounded-full !border !border-white/70 !bg-white/85 !px-4 !py-2 !text-base !font-semibold !text-[#1E2451] !shadow-[0_12px_22px_rgba(30,36,81,0.08)] sm:!text-sm"
       }}
       detailsModal={{
         hideSendFunds: true

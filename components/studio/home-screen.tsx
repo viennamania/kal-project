@@ -233,21 +233,21 @@ export function HomeScreen() {
 
   return (
     <main className="relative overflow-hidden">
-      <section className="mx-auto max-w-7xl px-4 pb-8 pt-6 sm:px-6 lg:px-8">
-        <header className="mb-6 flex flex-col gap-4 rounded-[36px] border border-white/70 bg-white/70 px-5 py-4 shadow-bubble backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-4">
+      <section className="mx-auto max-w-7xl px-4 pb-8 pt-4 sm:px-6 sm:pt-6 lg:px-8">
+        <header className="mb-6 flex flex-col gap-4 rounded-[32px] border border-white/70 bg-white/70 px-4 py-4 shadow-bubble backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between sm:rounded-[36px] sm:px-5">
+          <div className="flex min-w-0 items-center gap-4">
             <div className="flex h-14 w-14 items-center justify-center rounded-[20px] bg-gradient-to-br from-sky to-candy shadow-soft">
               <Image alt={common.mascotAlt} height={44} src="/mascot-orbit.svg" width={44} />
             </div>
-            <div>
-              <p className="font-display text-2xl text-ink">{common.brand}</p>
+            <div className="min-w-0">
+              <p className="font-display text-xl text-ink sm:text-2xl">{common.brand}</p>
               <p className="text-sm text-ink/65">{home.heroDescription}</p>
             </div>
           </div>
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="grid w-full gap-3 sm:flex sm:w-auto sm:flex-wrap sm:items-center">
             <LanguageSwitcher />
             <Link
-              className="rounded-full border border-white/70 bg-white/70 px-4 py-2 text-sm font-semibold text-ink/80"
+              className="inline-flex min-h-12 items-center justify-center rounded-full border border-white/70 bg-white/70 px-4 py-3 text-sm font-semibold text-ink/80 sm:min-h-0 sm:py-2"
               href="/wallet"
             >
               {nav.walletService}
@@ -257,7 +257,7 @@ export function HomeScreen() {
         </header>
 
         <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
-          <Panel className="relative overflow-hidden p-8">
+          <Panel className="relative overflow-hidden p-5 sm:p-8">
             <div className="absolute right-4 top-4 h-28 w-28 rounded-full bg-candy/20 blur-3xl" />
             <div className="absolute bottom-6 left-6 h-32 w-32 rounded-full bg-mint/20 blur-3xl" />
 
@@ -269,7 +269,7 @@ export function HomeScreen() {
               </div>
 
               <div className="max-w-xl">
-                <h1 className="font-display text-5xl leading-none text-ink sm:text-6xl">
+                <h1 className="font-display text-[2.75rem] leading-[0.95] text-ink sm:text-6xl">
                   {home.heroTitle}
                 </h1>
                 <p className="mt-4 text-base leading-7 text-ink/70">{home.heroDescription}</p>
@@ -305,8 +305,8 @@ export function HomeScreen() {
                 </Panel>
               </div>
 
-              <Panel className="flex items-center justify-between gap-4 bg-gradient-to-r from-white to-sky/10">
-                <div>
+              <Panel className="flex flex-col items-start gap-4 bg-gradient-to-r from-white to-sky/10 sm:flex-row sm:items-center sm:justify-between">
+                <div className="min-w-0">
                   <p className="text-sm font-semibold text-ink">
                     {member
                       ? formatMessage(home.launchReadyTitleLoggedIn, {
@@ -323,15 +323,15 @@ export function HomeScreen() {
                       : home.launchReadyBodyLoggedOut}
                   </p>
                 </div>
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-ink text-white">
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-ink text-white">
                   {member ? <Sparkles className="h-6 w-6" /> : <Wallet2 className="h-6 w-6" />}
                 </div>
               </Panel>
             </div>
           </Panel>
 
-          <Panel className="p-6">
-            <div className="mb-5 flex items-center justify-between">
+          <Panel className="p-5 sm:p-6">
+            <div className="mb-5 flex items-start justify-between gap-3">
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.22em] text-ink/45">
                   {home.studioEyebrow}
@@ -408,7 +408,7 @@ export function HomeScreen() {
                 <label className="mb-2 block text-sm font-semibold text-ink/70">
                   {home.imageFieldLabel}
                 </label>
-                <label className="flex cursor-pointer items-center gap-4 rounded-[28px] border border-dashed border-candy/35 bg-candy/10 p-4">
+                <label className="flex cursor-pointer flex-col items-start gap-4 rounded-[28px] border border-dashed border-candy/35 bg-candy/10 p-4 sm:flex-row sm:items-center">
                   <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-[24px] bg-white">
                     {imagePreview ? (
                       <Image
@@ -427,7 +427,7 @@ export function HomeScreen() {
                       />
                     )}
                   </div>
-                  <div className="flex-1">
+                  <div className="min-w-0 flex-1">
                     <p className="text-sm font-semibold text-ink">{home.imageFieldHint}</p>
                     <p className="mt-1 text-sm text-ink/60">{home.imageFieldStorageHint}</p>
                   </div>
@@ -459,7 +459,7 @@ export function HomeScreen() {
         </div>
 
         <section className="mt-8 grid gap-4 lg:grid-cols-[0.8fr_1.2fr]">
-          <Panel>
+          <Panel className="p-5 sm:p-6">
             <p className="text-sm font-semibold uppercase tracking-[0.22em] text-ink/45">
               {home.boardTitle}
             </p>
@@ -510,8 +510,8 @@ export function HomeScreen() {
             </div>
           </Panel>
 
-          <Panel>
-            <div className="mb-4 flex items-end justify-between gap-4">
+          <Panel className="p-5 sm:p-6">
+            <div className="mb-4 flex flex-col items-start gap-3 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.22em] text-ink/45">
                   {home.communityLaunchesEyebrow}
@@ -559,7 +559,7 @@ export function HomeScreen() {
                     </div>
                   </div>
                   <div className="mt-4 space-y-2 text-sm text-ink/65">
-                    <p>
+                    <p className="break-words">
                       {home.ownerLabel}:{" "}
                       {token.owner?.displayName ?? shortenAddress(token.ownerWallet)}
                     </p>

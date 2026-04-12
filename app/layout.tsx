@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { cookies, headers } from "next/headers";
 import { Baloo_2, Plus_Jakarta_Sans } from "next/font/google";
 
@@ -31,6 +31,12 @@ export function generateMetadata(): Metadata {
   };
 }
 
+export const viewport: Viewport = {
+  initialScale: 1,
+  viewportFit: "cover",
+  width: "device-width"
+};
+
 export default function RootLayout({
   children
 }: Readonly<{
@@ -44,7 +50,9 @@ export default function RootLayout({
 
   return (
     <html lang={locale}>
-      <body className={`${displayFont.variable} ${bodyFont.variable} bg-confetti font-body text-ink`}>
+      <body
+        className={`${displayFont.variable} ${bodyFont.variable} min-h-dvh overflow-x-hidden bg-confetti font-body text-ink`}
+      >
         <AppProvider dictionary={dictionary} locale={locale}>
           {children}
         </AppProvider>
