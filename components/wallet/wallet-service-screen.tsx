@@ -15,14 +15,17 @@ import { useActiveAccount } from "thirdweb/react";
 import { Search, Send, ShieldCheck } from "lucide-react";
 
 import { WalletConnectButton } from "@/components/auth/wallet-connect-button";
+import { LanguageSwitcher } from "@/components/i18n/language-switcher";
+import { useLocale } from "@/components/providers/locale-provider";
 import { useWalletMember } from "@/components/providers/wallet-member-provider";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Panel } from "@/components/ui/panel";
+import { formatMessage, getIntlLocale } from "@/lib/i18n";
 import { appChain, thirdwebClient } from "@/lib/thirdweb";
 import type { PublicToken, PublicUser } from "@/lib/types";
-import { formatDate, shortenAddress } from "@/lib/utils";
+import { formatAmount, formatDate, shortenAddress } from "@/lib/utils";
 
 type TokenBalance = {
   displayValue: string;
@@ -31,10 +34,12 @@ type TokenBalance = {
 
 export function WalletServiceScreen() {
   const account = useActiveAccount();
+  const { dictionary, locale } = useLocale();
   const { member } = useWalletMember();
   const [amount, setAmount] = useState("");
   const [balances, setBalances] = useState<Record<string, TokenBalance>>({});
   const [isLoading, setIsLoading] = useState(true);
+  const [isSending, setIsSending] = useState(false);
   const [members, setMembers] = useState<PublicUser[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedMember, setSelectedMember] = useState<PublicUser | null>(null);
@@ -42,6 +47,11 @@ export function WalletServiceScreen() {
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [tokens, setTokens] = useState<PublicToken[]>([]);
   const deferredSearch = useDeferredValue(searchTerm);
+  const home = dictionary.home;
+  const nav = dictionary.nav;
+  const wallet = dictionary.wallet;
+  const common = dictionary.common;
+  const intlLocale = getIntlLocale(locale);
 
   useEffect(() => {
     let ignore = false;
@@ -129,16 +139,22 @@ export function WalletServiceScreen() {
     let ignore = false;
 
     async function loadMembers() {
-      const query = deferredSearch.trim();
-      const response = await fetch(`/api/users/search?q=${encodeURIComponent(query)}&limit=8`, {
-        cache: "no-store"
-      });
-      const data = (await response.json()) as { users: PublicUser[] };
-
-      if (!ignore) {
-        startTransition(() => {
-          setMembers(data.users.filter((user) => user.walletAddress !== account?.address));
+      try {
+        const query = deferredSearch.trim();
+        const response = await fetch(`/api/users/search?q=${encodeURIComponent(query)}&limit=8`, {
+          cache: "no-store"
         });
+        const data = (await response.json()) as { users: PublicUser[] };
+
+        if (!ignore) {
+          startTransition(() => {
+            setMembers(data.users.filter((user) => user.walletAddress !== account?.address));
+          });
+        }
+      } catch {
+        if (!ignore) {
+          setMembers([]);
+        }
       }
     }
 
@@ -149,7 +165,11 @@ export function WalletServiceScreen() {
     };
   }, [account?.address, deferredSearch]);
 
-  const selectedToken = tokens.find((token) => token.contractAddress === selectedTokenAddress) ?? null;
+  const selectedToken =
+    tokens.find((token) => token.contractAddress === selectedTokenAddress) ?? null;
+  const availableAmount = selectedToken
+    ? balances[selectedToken.contractAddress]?.displayValue ?? "0"
+    : "0";
 
   async function refreshBalances() {
     if (!account?.address || tokens.length === 0) {
@@ -164,6 +184,7 @@ export function WalletServiceScreen() {
           client: thirdwebClient
         });
         const balance = await getBalance({ address: account.address, contract });
+
         return [
           token.contractAddress,
           {
@@ -181,16 +202,17 @@ export function WalletServiceScreen() {
     event.preventDefault();
 
     if (!account || !selectedToken || !selectedMember) {
-      setStatusMessage("Pick a token and a recipient before sending.");
+      setStatusMessage(wallet.pickRecipientError);
       return;
     }
 
     if (selectedMember.walletAddress === account.address) {
-      setStatusMessage("Sending to your own wallet is blocked in this demo.");
+      setStatusMessage(wallet.selfTransferError);
       return;
     }
 
-    setStatusMessage("Sending token...");
+    setIsSending(true);
+    setStatusMessage(wallet.sendInProgress);
 
     try {
       const contract = getContract({
@@ -218,9 +240,19 @@ export function WalletServiceScreen() {
 
       await refreshBalances();
       setAmount("");
-      setStatusMessage(`Sent ${amount} ${selectedToken.symbol} to ${selectedMember.displayName}.`);
+      setStatusMessage(
+        formatMessage(wallet.sendSuccess, {
+          amount,
+          name: selectedMember.displayName,
+          symbol: selectedToken.symbol
+        })
+      );
     } catch (error) {
-      setStatusMessage(error instanceof Error ? error.message : "Token transfer failed.");
+      setStatusMessage(
+        error instanceof Error && error.message ? error.message : wallet.transferFailed
+      );
+    } finally {
+      setIsSending(false);
     }
   }
 
@@ -229,16 +261,17 @@ export function WalletServiceScreen() {
       <header className="mb-6 flex flex-col gap-4 rounded-[36px] border border-white/70 bg-white/70 px-5 py-4 shadow-bubble backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-sm font-semibold uppercase tracking-[0.22em] text-ink/45">
-            Wallet service
+            {wallet.headerEyebrow}
           </p>
-          <h1 className="mt-2 font-display text-4xl text-ink">Balances, members, and token send</h1>
+          <h1 className="mt-2 font-display text-4xl text-ink">{wallet.headerTitle}</h1>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          <LanguageSwitcher />
           <Link
             className="rounded-full border border-white/70 bg-white/70 px-4 py-2 text-sm font-semibold text-ink/80"
             href="/"
           >
-            Back to studio
+            {nav.backToStudio}
           </Link>
           <WalletConnectButton />
         </div>
@@ -246,20 +279,28 @@ export function WalletServiceScreen() {
 
       <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
         <Panel className="p-6">
-          <div className="mb-5 flex items-center justify-between">
+          <div className="mb-5 flex items-center justify-between gap-4">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.22em] text-ink/45">
-                Community token list
+                {wallet.tokenListEyebrow}
               </p>
-              <h2 className="mt-2 font-display text-3xl text-ink">All issued contracts</h2>
+              <h2 className="mt-2 font-display text-3xl text-ink">{wallet.tokenListTitle}</h2>
             </div>
-            <Badge className="bg-sky/20 text-ink">{tokens.length} tokens</Badge>
+            <Badge className="bg-sky/20 text-ink">
+              {formatAmount(tokens.length, intlLocale)} {wallet.tokenCountSuffix}
+            </Badge>
           </div>
 
           <div className="space-y-4">
             {isLoading ? (
               <div className="rounded-[28px] border border-dashed border-white/80 bg-white/55 p-5 text-sm text-ink/60">
-                Loading tokens...
+                {wallet.loadingTokens}
+              </div>
+            ) : null}
+
+            {!isLoading && tokens.length === 0 ? (
+              <div className="rounded-[28px] border border-dashed border-white/80 bg-white/55 p-5 text-sm text-ink/60">
+                {wallet.emptyTokens}
               </div>
             ) : null}
 
@@ -280,7 +321,12 @@ export function WalletServiceScreen() {
                           width={64}
                         />
                       ) : (
-                        <Image alt="Fallback mascot" height={46} src="/mascot-orbit.svg" width={46} />
+                        <Image
+                          alt={common.fallbackMascotAlt}
+                          height={46}
+                          src="/mascot-orbit.svg"
+                          width={46}
+                        />
                       )}
                     </div>
                     <div>
@@ -289,13 +335,19 @@ export function WalletServiceScreen() {
                         {token.symbol} · {shortenAddress(token.contractAddress, 8, 6)}
                       </p>
                       <p className="mt-1 text-xs text-ink/45">
-                        by {token.owner?.displayName ?? shortenAddress(token.ownerWallet)} · {formatDate(token.deployedAt)}
+                        {home.ownerLabel}:{" "}
+                        {token.owner?.displayName ?? shortenAddress(token.ownerWallet)}
+                      </p>
+                      <p className="mt-1 text-xs text-ink/45">
+                        {home.launchedLabel}: {formatDate(token.deployedAt, intlLocale)}
                       </p>
                     </div>
                   </div>
 
                   <div className="rounded-[24px] bg-bubble px-4 py-3 text-right">
-                    <p className="text-xs uppercase tracking-[0.18em] text-ink/45">My balance</p>
+                    <p className="text-xs uppercase tracking-[0.18em] text-ink/45">
+                      {wallet.myBalanceLabel}
+                    </p>
                     <p className="mt-1 text-lg font-semibold text-ink">
                       {account ? balances[token.contractAddress]?.displayValue ?? "0" : "-"}
                     </p>
@@ -311,10 +363,10 @@ export function WalletServiceScreen() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.22em] text-ink/45">
-                  Active wallet
+                  {wallet.activeWalletEyebrow}
                 </p>
                 <h2 className="mt-2 font-display text-3xl text-ink">
-                  {member ? member.displayName : "Connect by phone"}
+                  {member ? member.displayName : wallet.activeWalletLoggedOut}
                 </h2>
               </div>
               <ShieldCheck className="h-7 w-7 text-mint" />
@@ -323,14 +375,14 @@ export function WalletServiceScreen() {
             <div className="mt-4 rounded-[28px] bg-bubble p-4 text-sm text-ink/70">
               {member ? (
                 <>
-                  <p>{member.maskedPhone}</p>
-                  <p className="mt-2">{shortenAddress(member.walletAddress, 10, 6)}</p>
-                  <p className="mt-2 text-xs text-ink/45">
-                    Smart account on BSC with sponsored gas enabled.
+                  {member.maskedPhone ? <p>{member.maskedPhone}</p> : null}
+                  <p className={member.maskedPhone ? "mt-2" : undefined}>
+                    {shortenAddress(member.walletAddress, 10, 6)}
                   </p>
+                  <p className="mt-2 text-xs text-ink/45">{wallet.smartAccountNote}</p>
                 </>
               ) : (
-                "Phone login is required to fetch balances and send community tokens."
+                wallet.connectRequiredNote
               )}
             </div>
           </Panel>
@@ -338,14 +390,16 @@ export function WalletServiceScreen() {
           <Panel className="p-6">
             <div className="mb-4">
               <p className="text-sm font-semibold uppercase tracking-[0.22em] text-ink/45">
-                Send token
+                {wallet.sendEyebrow}
               </p>
-              <h3 className="mt-2 font-display text-3xl text-ink">Search a member and transfer</h3>
+              <h3 className="mt-2 font-display text-3xl text-ink">{wallet.sendTitle}</h3>
             </div>
 
             <form className="space-y-4" onSubmit={handleTransfer}>
               <div>
-                <label className="mb-2 block text-sm font-semibold text-ink/70">Token</label>
+                <label className="mb-2 block text-sm font-semibold text-ink/70">
+                  {wallet.tokenFieldLabel}
+                </label>
                 <select
                   className="h-12 w-full rounded-3xl border border-white/70 bg-white/85 px-4 text-sm font-medium text-ink outline-none"
                   onChange={(event) => setSelectedTokenAddress(event.target.value)}
@@ -360,13 +414,15 @@ export function WalletServiceScreen() {
               </div>
 
               <div>
-                <label className="mb-2 block text-sm font-semibold text-ink/70">Member search</label>
+                <label className="mb-2 block text-sm font-semibold text-ink/70">
+                  {wallet.searchFieldLabel}
+                </label>
                 <div className="relative">
                   <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-ink/40" />
                   <Input
                     className="pl-11"
                     onChange={(event) => setSearchTerm(event.target.value)}
-                    placeholder="Display name, phone tail, wallet..."
+                    placeholder={wallet.searchFieldPlaceholder}
                     value={searchTerm}
                   />
                 </div>
@@ -389,15 +445,25 @@ export function WalletServiceScreen() {
                       </p>
                     </button>
                   ))}
+
+                  {members.length === 0 ? (
+                    <div className="rounded-[24px] border border-dashed border-white/80 bg-white/55 px-4 py-3 text-sm text-ink/60">
+                      {wallet.emptyMembers}
+                    </div>
+                  ) : null}
                 </div>
               </div>
 
               <div>
-                <label className="mb-2 block text-sm font-semibold text-ink/70">Amount</label>
+                <label className="mb-2 block text-sm font-semibold text-ink/70">
+                  {wallet.amountFieldLabel}
+                </label>
                 <Input
                   inputMode="decimal"
                   onChange={(event) => setAmount(event.target.value)}
-                  placeholder={`Available: ${selectedToken ? balances[selectedToken.contractAddress]?.displayValue ?? "0" : "0"}`}
+                  placeholder={formatMessage(wallet.amountPlaceholder, {
+                    amount: availableAmount
+                  })}
                   value={amount}
                 />
               </div>
@@ -408,9 +474,13 @@ export function WalletServiceScreen() {
                 </div>
               ) : null}
 
-              <Button className="w-full" disabled={!account || !selectedToken || !selectedMember} type="submit">
+              <Button
+                className="w-full"
+                disabled={!account || !selectedToken || !selectedMember || !amount.trim() || isSending}
+                type="submit"
+              >
                 <Send className="mr-2 h-4 w-4" />
-                Send token
+                {isSending ? wallet.sendInProgress : wallet.sendButton}
               </Button>
             </form>
           </Panel>

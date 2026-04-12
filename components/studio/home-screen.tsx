@@ -10,12 +10,15 @@ import { useActiveAccount } from "thirdweb/react";
 import { Sparkles, Stars, Wallet2 } from "lucide-react";
 
 import { WalletConnectButton } from "@/components/auth/wallet-connect-button";
+import { LanguageSwitcher } from "@/components/i18n/language-switcher";
+import { useLocale } from "@/components/providers/locale-provider";
 import { useWalletMember } from "@/components/providers/wallet-member-provider";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Panel } from "@/components/ui/panel";
 import { Textarea } from "@/components/ui/textarea";
+import { formatMessage, getIntlLocale } from "@/lib/i18n";
 import { appChain, thirdwebClient } from "@/lib/thirdweb";
 import type { PublicToken } from "@/lib/types";
 import { formatCompact, formatDate, shortenAddress } from "@/lib/utils";
@@ -38,6 +41,7 @@ const initialForm: StudioForm = {
 
 export function HomeScreen() {
   const account = useActiveAccount();
+  const { dictionary, locale } = useLocale();
   const { member, status: memberStatus } = useWalletMember();
   const [communityTokens, setCommunityTokens] = useState<PublicToken[]>([]);
   const [form, setForm] = useState<StudioForm>(initialForm);
@@ -46,6 +50,11 @@ export function HomeScreen() {
   const [isDeploying, setIsDeploying] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  const home = dictionary.home;
+  const nav = dictionary.nav;
+  const common = dictionary.common;
+  const intlLocale = getIntlLocale(locale);
 
   useEffect(() => {
     let ignore = false;
@@ -104,12 +113,12 @@ export function HomeScreen() {
     event.preventDefault();
 
     if (!account) {
-      setFormError("Phone wallet must be connected before deployment.");
+      setFormError(home.emptyWalletError);
       return;
     }
 
     if (!form.image) {
-      setFormError("Token art is required.");
+      setFormError(home.emptyImageError);
       return;
     }
 
@@ -127,7 +136,7 @@ export function HomeScreen() {
       });
 
       if (!uploadResponse.ok) {
-        throw new Error("Image upload failed.");
+        throw new Error(home.imageUploadFailed);
       }
 
       const uploadPayload = (await uploadResponse.json()) as { url: string };
@@ -137,7 +146,12 @@ export function HomeScreen() {
         chain: appChain,
         client: thirdwebClient,
         params: {
-          description: form.description || `${form.name} token launched from Oasis Token Arcade`,
+          description:
+            form.description ||
+            formatMessage(home.defaultDescriptionTemplate, {
+              brand: common.brand,
+              name: form.name.trim()
+            }),
           image: uploadPayload.url,
           name: form.name.trim(),
           symbol: form.symbol.trim().toUpperCase()
@@ -186,14 +200,18 @@ export function HomeScreen() {
       });
 
       if (!saveResponse.ok) {
-        throw new Error("Contract saved onchain but database sync failed.");
+        throw new Error(home.tokenSaveFailed);
       }
 
       const latest = await fetch("/api/tokens", { cache: "no-store" });
       const latestPayload = (await latest.json()) as { tokens: PublicToken[] };
 
       setCommunityTokens(latestPayload.tokens);
-      setSuccessMessage(`Token deployed at ${shortenAddress(contractAddress, 8, 6)}.`);
+      setSuccessMessage(
+        formatMessage(home.deploySuccess, {
+          address: shortenAddress(contractAddress, 8, 6)
+        })
+      );
       setForm(initialForm);
 
       if (imagePreview) {
@@ -202,7 +220,11 @@ export function HomeScreen() {
 
       setImagePreview(null);
     } catch (error) {
-      setFormError(error instanceof Error ? error.message : "Token deployment failed.");
+      setFormError(
+        error instanceof Error && error.message
+          ? error.message
+          : home.tokenDeployFallbackError
+      );
     } finally {
       setIsDeploying(false);
     }
@@ -214,21 +236,20 @@ export function HomeScreen() {
         <header className="mb-6 flex flex-col gap-4 rounded-[36px] border border-white/70 bg-white/70 px-5 py-4 shadow-bubble backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-4">
             <div className="flex h-14 w-14 items-center justify-center rounded-[20px] bg-gradient-to-br from-sky to-candy shadow-soft">
-              <Image alt="Oasis mascot" height={44} src="/mascot-orbit.svg" width={44} />
+              <Image alt={common.mascotAlt} height={44} src="/mascot-orbit.svg" width={44} />
             </div>
             <div>
-              <p className="font-display text-2xl text-ink">Oasis Token Arcade</p>
-              <p className="text-sm text-ink/65">
-                Phone-first ERC20 launcher with smart accounts on BSC
-              </p>
+              <p className="font-display text-2xl text-ink">{common.brand}</p>
+              <p className="text-sm text-ink/65">{home.heroDescription}</p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
+            <LanguageSwitcher />
             <Link
               className="rounded-full border border-white/70 bg-white/70 px-4 py-2 text-sm font-semibold text-ink/80"
               href="/wallet"
             >
-              Wallet service
+              {nav.walletService}
             </Link>
             <WalletConnectButton />
           </div>
@@ -241,43 +262,45 @@ export function HomeScreen() {
 
             <div className="relative flex flex-col gap-6">
               <div className="flex flex-wrap items-center gap-2">
-                <Badge className="bg-mint/30 text-ink">studio live</Badge>
-                <Badge className="bg-sky/25 text-ink">BSC mainnet</Badge>
-                <Badge className="bg-peach/45 text-ink">gas sponsored</Badge>
+                <Badge className="bg-mint/30 text-ink">{home.studioTag}</Badge>
+                <Badge className="bg-sky/25 text-ink">{home.networkTag}</Badge>
+                <Badge className="bg-peach/45 text-ink">{home.gasSponsoredTag}</Badge>
               </div>
 
               <div className="max-w-xl">
                 <h1 className="font-display text-5xl leading-none text-ink sm:text-6xl">
-                  Launch bright little tokens with one phone tap.
+                  {home.heroTitle}
                 </h1>
-                <p className="mt-4 text-base leading-7 text-ink/70">
-                  Every member logs in by phone, receives a sponsored smart account, uploads token
-                  art to Vercel Blob, and stores contracts in Atlas MongoDB for the community
-                  wallet hub.
-                </p>
+                <p className="mt-4 text-base leading-7 text-ink/70">{home.heroDescription}</p>
               </div>
 
               <div className="grid gap-4 sm:grid-cols-3">
                 <Panel className="bg-bubble">
-                  <p className="text-xs uppercase tracking-[0.22em] text-ink/45">Community</p>
-                  <p className="mt-3 font-display text-4xl text-ink">
-                    {isLoading ? "..." : formatCompact(communityTokens.length)}
+                  <p className="text-xs uppercase tracking-[0.22em] text-ink/45">
+                    {home.communityStatLabel}
                   </p>
-                  <p className="mt-2 text-sm text-ink/60">issued token contracts</p>
+                  <p className="mt-3 font-display text-4xl text-ink">
+                    {isLoading ? "..." : formatCompact(communityTokens.length, intlLocale)}
+                  </p>
+                  <p className="mt-2 text-sm text-ink/60">{home.communityStatCaption}</p>
                 </Panel>
                 <Panel className="bg-bubble">
-                  <p className="text-xs uppercase tracking-[0.22em] text-ink/45">Members</p>
-                  <p className="mt-3 font-display text-4xl text-ink">
-                    {isLoading ? "..." : formatCompact(uniqueMembers)}
+                  <p className="text-xs uppercase tracking-[0.22em] text-ink/45">
+                    {home.membersStatLabel}
                   </p>
-                  <p className="mt-2 text-sm text-ink/60">smart accounts onboarded</p>
+                  <p className="mt-3 font-display text-4xl text-ink">
+                    {isLoading ? "..." : formatCompact(uniqueMembers, intlLocale)}
+                  </p>
+                  <p className="mt-2 text-sm text-ink/60">{home.membersStatCaption}</p>
                 </Panel>
                 <Panel className="bg-bubble">
-                  <p className="text-xs uppercase tracking-[0.22em] text-ink/45">Mine</p>
+                  <p className="text-xs uppercase tracking-[0.22em] text-ink/45">
+                    {home.mineStatLabel}
+                  </p>
                   <p className="mt-3 font-display text-4xl text-ink">
                     {account ? myTokens.length : 0}
                   </p>
-                  <p className="mt-2 text-sm text-ink/60">contracts launched from your wallet</p>
+                  <p className="mt-2 text-sm text-ink/60">{home.mineStatCaption}</p>
                 </Panel>
               </div>
 
@@ -285,13 +308,18 @@ export function HomeScreen() {
                 <div>
                   <p className="text-sm font-semibold text-ink">
                     {member
-                      ? `${member.displayName} is ready to ship`
-                      : "Phone connect unlocks your wallet studio"}
+                      ? formatMessage(home.launchReadyTitleLoggedIn, {
+                          name: member.displayName
+                        })
+                      : home.launchReadyTitleLoggedOut}
                   </p>
                   <p className="mt-1 text-sm text-ink/60">
                     {member
-                      ? `${member.maskedPhone} · ${shortenAddress(member.walletAddress, 8, 6)}`
-                      : "Only phone login is enabled. Smart account gas is sponsored automatically."}
+                      ? formatMessage(home.launchReadyBodyLoggedIn, {
+                          address: shortenAddress(member.walletAddress, 8, 6),
+                          phone: member.maskedPhone ?? ""
+                        })
+                      : home.launchReadyBodyLoggedOut}
                   </p>
                 </div>
                 <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-ink text-white">
@@ -305,9 +333,9 @@ export function HomeScreen() {
             <div className="mb-5 flex items-center justify-between">
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.22em] text-ink/45">
-                  ERC20 Studio
+                  {home.studioEyebrow}
                 </p>
-                <h2 className="mt-2 font-display text-3xl text-ink">Create a BSC token</h2>
+                <h2 className="mt-2 font-display text-3xl text-ink">{home.studioTitle}</h2>
               </div>
               <Stars className="h-6 w-6 text-candy" />
             </div>
@@ -315,24 +343,28 @@ export function HomeScreen() {
             <form className="space-y-4" onSubmit={handleDeploy}>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <label className="mb-2 block text-sm font-semibold text-ink/70">Name</label>
+                  <label className="mb-2 block text-sm font-semibold text-ink/70">
+                    {home.nameFieldLabel}
+                  </label>
                   <Input
                     onChange={(event) =>
                       setForm((current) => ({ ...current, name: event.target.value }))
                     }
-                    placeholder="Candy Rangers"
+                    placeholder={home.nameFieldPlaceholder}
                     required
                     value={form.name}
                   />
                 </div>
                 <div>
-                  <label className="mb-2 block text-sm font-semibold text-ink/70">Symbol</label>
+                  <label className="mb-2 block text-sm font-semibold text-ink/70">
+                    {home.symbolFieldLabel}
+                  </label>
                   <Input
                     maxLength={12}
                     onChange={(event) =>
                       setForm((current) => ({ ...current, symbol: event.target.value }))
                     }
-                    placeholder="RANG"
+                    placeholder={home.symbolFieldPlaceholder}
                     required
                     value={form.symbol}
                   />
@@ -342,19 +374,19 @@ export function HomeScreen() {
               <div className="grid gap-4 sm:grid-cols-[1fr_180px]">
                 <div>
                   <label className="mb-2 block text-sm font-semibold text-ink/70">
-                    Description
+                    {home.descriptionFieldLabel}
                   </label>
                   <Textarea
                     onChange={(event) =>
                       setForm((current) => ({ ...current, description: event.target.value }))
                     }
-                    placeholder="A playful community token for the next launch campaign."
+                    placeholder={home.descriptionFieldPlaceholder}
                     value={form.description}
                   />
                 </div>
                 <div>
                   <label className="mb-2 block text-sm font-semibold text-ink/70">
-                    Initial supply
+                    {home.initialSupplyFieldLabel}
                   </label>
                   <Input
                     inputMode="decimal"
@@ -366,32 +398,37 @@ export function HomeScreen() {
                     value={form.supply}
                   />
                   <div className="mt-3 rounded-[28px] border border-dashed border-sky/40 bg-sky/10 p-3 text-xs text-ink/60">
-                    Minted directly to your connected smart account after deployment.
+                    {home.smartAccountHint}
                   </div>
                 </div>
               </div>
 
               <div>
-                <label className="mb-2 block text-sm font-semibold text-ink/70">Token art</label>
+                <label className="mb-2 block text-sm font-semibold text-ink/70">
+                  {home.imageFieldLabel}
+                </label>
                 <label className="flex cursor-pointer items-center gap-4 rounded-[28px] border border-dashed border-candy/35 bg-candy/10 p-4">
                   <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-[24px] bg-white">
                     {imagePreview ? (
                       <Image
-                        alt="Token preview"
+                        alt={common.tokenPreviewAlt}
                         className="h-full w-full object-cover"
                         height={96}
                         src={imagePreview}
                         width={96}
                       />
                     ) : (
-                      <Image alt="Upload mascot" height={54} src="/mascot-orbit.svg" width={54} />
+                      <Image
+                        alt={common.uploadMascotAlt}
+                        height={54}
+                        src="/mascot-orbit.svg"
+                        width={54}
+                      />
                     )}
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm font-semibold text-ink">PNG, JPG, WEBP up to 4MB</p>
-                    <p className="mt-1 text-sm text-ink/60">
-                      Stored in Vercel Blob and reused across studio + wallet service.
-                    </p>
+                    <p className="text-sm font-semibold text-ink">{home.imageFieldHint}</p>
+                    <p className="mt-1 text-sm text-ink/60">{home.imageFieldStorageHint}</p>
                   </div>
                   <input accept="image/*" className="hidden" onChange={handleImagePick} type="file" />
                 </label>
@@ -409,8 +446,12 @@ export function HomeScreen() {
                 </div>
               ) : null}
 
-              <Button className="w-full" disabled={isDeploying || memberStatus === "loading"} type="submit">
-                {isDeploying ? "Deploying token..." : "Deploy token on BSC"}
+              <Button
+                className="w-full"
+                disabled={isDeploying || memberStatus === "loading"}
+                type="submit"
+              >
+                {isDeploying ? home.deployingButton : home.deployButton}
               </Button>
             </form>
           </Panel>
@@ -419,7 +460,7 @@ export function HomeScreen() {
         <section className="mt-8 grid gap-4 lg:grid-cols-[0.8fr_1.2fr]">
           <Panel>
             <p className="text-sm font-semibold uppercase tracking-[0.22em] text-ink/45">
-              Your launch board
+              {home.boardTitle}
             </p>
             <div className="mt-4 space-y-3">
               {account && myTokens.length > 0 ? (
@@ -439,7 +480,12 @@ export function HomeScreen() {
                             width={56}
                           />
                         ) : (
-                          <Image alt="Fallback mascot" height={42} src="/mascot-orbit.svg" width={42} />
+                          <Image
+                            alt={common.fallbackMascotAlt}
+                            height={42}
+                            src="/mascot-orbit.svg"
+                            width={42}
+                          />
                         )}
                       </div>
                       <div className="min-w-0">
@@ -449,12 +495,15 @@ export function HomeScreen() {
                         </p>
                       </div>
                     </div>
-                    <p className="mt-3 text-xs text-ink/50">Saved to Atlas · {formatDate(token.deployedAt)}</p>
+                    <p className="mt-3 text-xs text-ink/50">
+                      {home.boardSavedPrefix}
+                      {formatDate(token.deployedAt, intlLocale)}
+                    </p>
                   </div>
                 ))
               ) : (
                 <div className="rounded-[28px] border border-dashed border-white/80 bg-white/55 p-5 text-sm text-ink/60">
-                  Your first launch will appear here once you deploy a token.
+                  {home.boardEmpty}
                 </div>
               )}
             </div>
@@ -464,12 +513,17 @@ export function HomeScreen() {
             <div className="mb-4 flex items-end justify-between gap-4">
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.22em] text-ink/45">
-                  Community launches
+                  {home.communityLaunchesEyebrow}
                 </p>
-                <h3 className="mt-2 font-display text-3xl text-ink">Fresh tokens from members</h3>
+                <h3 className="mt-2 font-display text-3xl text-ink">
+                  {home.communityLaunchesTitle}
+                </h3>
               </div>
-              <Link className="text-sm font-semibold text-ink/70 underline-offset-4 hover:underline" href="/wallet">
-                Open wallet service
+              <Link
+                className="text-sm font-semibold text-ink/70 underline-offset-4 hover:underline"
+                href="/wallet"
+              >
+                {home.openWalletService}
               </Link>
             </div>
 
@@ -490,7 +544,12 @@ export function HomeScreen() {
                           width={64}
                         />
                       ) : (
-                        <Image alt="Fallback mascot" height={48} src="/mascot-orbit.svg" width={48} />
+                        <Image
+                          alt={common.fallbackMascotAlt}
+                          height={48}
+                          src="/mascot-orbit.svg"
+                          width={48}
+                        />
                       )}
                     </div>
                     <div className="min-w-0">
@@ -499,9 +558,16 @@ export function HomeScreen() {
                     </div>
                   </div>
                   <div className="mt-4 space-y-2 text-sm text-ink/65">
-                    <p>Owner: {token.owner?.displayName ?? shortenAddress(token.ownerWallet)}</p>
-                    <p>Supply: {token.supply}</p>
-                    <p>Launched: {formatDate(token.deployedAt)}</p>
+                    <p>
+                      {home.ownerLabel}:{" "}
+                      {token.owner?.displayName ?? shortenAddress(token.ownerWallet)}
+                    </p>
+                    <p>
+                      {home.supplyLabel}: {token.supply}
+                    </p>
+                    <p>
+                      {home.launchedLabel}: {formatDate(token.deployedAt, intlLocale)}
+                    </p>
                   </div>
                 </div>
               ))}

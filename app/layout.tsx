@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
+import { cookies, headers } from "next/headers";
 import { Baloo_2, Plus_Jakarta_Sans } from "next/font/google";
 
 import { AppProvider } from "@/components/providers/app-provider";
 import "@/app/globals.css";
+import { getDictionary, getRequestLocale, LOCALE_COOKIE_NAME } from "@/lib/i18n";
 
 const displayFont = Baloo_2({
   subsets: ["latin"],
@@ -16,21 +18,36 @@ const bodyFont = Plus_Jakarta_Sans({
   weight: ["400", "500", "600", "700"]
 });
 
-export const metadata: Metadata = {
-  description:
-    "Phone-first BSC token studio powered by thirdweb smart accounts, Vercel Blob, and MongoDB Atlas.",
-  title: "Oasis Token Arcade"
-};
+export function generateMetadata(): Metadata {
+  const locale = getRequestLocale({
+    acceptLanguage: headers().get("accept-language"),
+    cookieLocale: cookies().get(LOCALE_COOKIE_NAME)?.value
+  });
+  const dictionary = getDictionary(locale);
+
+  return {
+    description: dictionary.connect.appDescription,
+    title: dictionary.common.brand
+  };
+}
 
 export default function RootLayout({
   children
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = getRequestLocale({
+    acceptLanguage: headers().get("accept-language"),
+    cookieLocale: cookies().get(LOCALE_COOKIE_NAME)?.value
+  });
+  const dictionary = getDictionary(locale);
+
   return (
-    <html lang="en">
+    <html lang={locale}>
       <body className={`${displayFont.variable} ${bodyFont.variable} bg-confetti font-body text-ink`}>
-        <AppProvider>{children}</AppProvider>
+        <AppProvider dictionary={dictionary} locale={locale}>
+          {children}
+        </AppProvider>
       </body>
     </html>
   );

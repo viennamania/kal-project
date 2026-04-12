@@ -19,7 +19,7 @@ export function shortenAddress(address: string, start = 6, end = 4) {
 
 export function maskPhone(phone?: string | null) {
   if (!phone) {
-    return "Phone pending";
+    return "••••";
   }
 
   const digits = phone.replace(/[^\d+]/g, "");
@@ -31,29 +31,29 @@ export function maskPhone(phone?: string | null) {
   return `${digits.slice(0, Math.max(0, digits.length - 4)).replace(/\d/g, "•")}${digits.slice(-4)}`;
 }
 
-export function formatAmount(value: number | string) {
+export function formatAmount(value: number | string, locale = "en-US") {
   const asNumber = typeof value === "string" ? Number(value) : value;
 
   if (Number.isNaN(asNumber)) {
     return "0";
   }
 
-  return new Intl.NumberFormat("en-US", {
+  return new Intl.NumberFormat(locale, {
     maximumFractionDigits: 4
   }).format(asNumber);
 }
 
-export function formatCompact(value: number) {
-  return new Intl.NumberFormat("en-US", {
+export function formatCompact(value: number, locale = "en-US") {
+  return new Intl.NumberFormat(locale, {
     notation: "compact",
     maximumFractionDigits: 1
   }).format(value);
 }
 
-export function formatDate(input: string | Date) {
+export function formatDate(input: string | Date, locale = "ko-KR") {
   const date = input instanceof Date ? input : new Date(input);
 
-  return new Intl.DateTimeFormat("ko-KR", {
+  return new Intl.DateTimeFormat(locale, {
     month: "short",
     day: "numeric",
     hour: "numeric",

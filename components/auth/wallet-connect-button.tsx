@@ -2,12 +2,23 @@
 
 import { ConnectButton, lightTheme } from "thirdweb/react";
 
-import { appChain, appMetadata, phoneWallet, thirdwebClient } from "@/lib/thirdweb";
+import { useLocale } from "@/components/providers/locale-provider";
+import { getThirdwebLocale } from "@/lib/i18n";
+import { publicEnv } from "@/lib/public-env";
+import { appChain, phoneWallet, thirdwebClient } from "@/lib/thirdweb";
 
 export function WalletConnectButton() {
+  const { dictionary, locale } = useLocale();
+  const connect = dictionary.connect;
+
   return (
     <ConnectButton
-      appMetadata={appMetadata}
+      appMetadata={{
+        description: connect.appDescription,
+        logoUrl: "/mascot-orbit.svg",
+        name: dictionary.common.brand,
+        url: publicEnv.NEXT_PUBLIC_APP_URL
+      }}
       autoConnect={{ timeout: 15000 }}
       chain={appChain}
       client={thirdwebClient}
@@ -18,10 +29,10 @@ export function WalletConnectButton() {
       connectModal={{
         showThirdwebBranding: false,
         size: "wide",
-        title: "Phone Connect",
+        title: connect.modalTitle,
         welcomeScreen: {
-          subtitle: "Smart account + sponsored gas on BSC for every member",
-          title: "Join the token arcade",
+          subtitle: connect.welcomeSubtitle,
+          title: connect.welcomeTitle,
           img: {
             src: "/mascot-orbit.svg",
             width: 200,
@@ -36,7 +47,7 @@ export function WalletConnectButton() {
       detailsModal={{
         hideSendFunds: true
       }}
-      locale="en_US"
+      locale={getThirdwebLocale(locale)}
       theme={lightTheme({
         colors: {
           accentButtonBg: "#1E2451",

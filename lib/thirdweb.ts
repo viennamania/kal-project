@@ -10,13 +10,6 @@ export const thirdwebClient = createThirdwebClient({
   clientId: publicEnv.NEXT_PUBLIC_THIRDWEB_CLIENT_ID
 });
 
-export const appMetadata = {
-  description: "Phone-first BSC token studio for playful product launches.",
-  logoUrl: `${publicEnv.NEXT_PUBLIC_APP_URL}/mascot-orbit.svg`,
-  name: "Oasis Token Arcade",
-  url: publicEnv.NEXT_PUBLIC_APP_URL
-};
-
 export const phoneWallet = inAppWallet({
   auth: {
     allowedSmsCountryCodes: ["KR", "US", "JP", "SG"],
