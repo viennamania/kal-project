@@ -18,6 +18,7 @@ export interface UserDocument {
 
 export interface TokenDocument {
   _id?: ObjectId;
+  buyEnabled?: boolean;
   chainId: number;
   contractAddress: string;
   deployTxHash?: string | null;
@@ -109,6 +110,7 @@ export interface PublicUser {
 
 export interface PublicToken {
   id: string;
+  buyEnabled?: boolean;
   chainId: number;
   contractAddress: string;
   deployTxHash?: string | null;

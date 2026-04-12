@@ -28,6 +28,7 @@ export function toPublicUser(user: UserDocument): PublicUser {
 export function toPublicToken(token: TokenDocument, owner?: UserDocument | null): PublicToken {
   return {
     id: token._id?.toString() ?? token.contractAddress,
+    buyEnabled: token.buyEnabled ?? false,
     chainId: token.chainId,
     contractAddress: token.contractAddress,
     deployTxHash: token.deployTxHash ?? null,

@@ -54,6 +54,8 @@ const copyByLocale: Record<
     explorerAction: string;
     manageAction: string;
     ownerLabel: string;
+    buyUnavailableBody: string;
+    buyUnavailableTitle: string;
     receiveHint: string;
     sendAction: string;
     statusDraft: string;
@@ -80,6 +82,9 @@ const copyByLocale: Record<
     explorerAction: "BscScan 보기",
     manageAction: "운영 센터",
     ownerLabel: "운영 지갑",
+    buyUnavailableBody:
+      "이 토큰은 아직 구매 경로가 준비되지 않았습니다. 유동성이나 지원 경로가 연결되면 여기에서 바로 구매할 수 있게 열립니다.",
+    buyUnavailableTitle: "구매 지원 준비 중",
     receiveHint: "구매가 완료되면 현재 연결된 지갑으로 바로 들어옵니다.",
     sendAction: "회원에게 보내기",
     statusDraft: "준비중",
@@ -105,6 +110,9 @@ const copyByLocale: Record<
     explorerAction: "View on BscScan",
     manageAction: "Manage center",
     ownerLabel: "Owner wallet",
+    buyUnavailableBody:
+      "This token does not have a live buy route yet. The widget will appear here after liquidity and routing are ready.",
+    buyUnavailableTitle: "Buy support is coming soon",
     receiveHint: "Purchased tokens are delivered to the wallet you are using now.",
     sendAction: "Send to a member",
     statusDraft: "Draft",
@@ -130,6 +138,9 @@ const copyByLocale: Record<
     explorerAction: "BscScanで見る",
     manageAction: "運営センター",
     ownerLabel: "運営ウォレット",
+    buyUnavailableBody:
+      "このトークンはまだ購入ルートが準備されていません。流動性や対応ルートが整うと、ここで購入できるようになります。",
+    buyUnavailableTitle: "購入サポート準備中",
     receiveHint: "購入が完了すると、今使っているウォレットにすぐ届きます。",
     sendAction: "メンバーに送る",
     statusDraft: "準備中",
@@ -155,6 +166,9 @@ const copyByLocale: Record<
     explorerAction: "在 BscScan 查看",
     manageAction: "运营中心",
     ownerLabel: "运营钱包",
+    buyUnavailableBody:
+      "这个代币暂时还没有可用的购买路径。等流动性和路由准备好后，这里会直接开放购买。",
+    buyUnavailableTitle: "购买功能准备中",
     receiveHint: "购买完成后，代币会直接进入你当前连接的钱包。",
     sendAction: "发送给会员",
     statusDraft: "准备中",
@@ -176,6 +190,7 @@ export function TokenDetailScreen({
   const intlLocale =
     locale === "ko" ? "ko-KR" : locale === "ja" ? "ja-JP" : locale === "zh-CN" ? "zh-CN" : "en-US";
   const copy = copyByLocale[locale];
+  const canBuyWithWidget = token.buyEnabled === true;
 
   const recentActivity = useMemo(() => {
     const transferItems = transferLogs.map((log) => ({
@@ -330,7 +345,7 @@ export function TokenDetailScreen({
             </p>
           </div>
 
-          {account ? (
+          {canBuyWithWidget && account ? (
             <TokenBuyPanel
               description={token.description || token.name}
               image={token.imageUrl}
@@ -338,11 +353,34 @@ export function TokenDetailScreen({
               title={token.name}
               tokenAddress={token.contractAddress as `0x${string}`}
             />
-          ) : (
+          ) : canBuyWithWidget ? (
             <Panel className="bg-bubble">
               <p className="text-sm text-ink/70">{copy.connectToBuy}</p>
               <div className="mt-4">
                 <WalletConnectButton />
+              </div>
+            </Panel>
+          ) : (
+            <Panel className="bg-bubble">
+              <div className="rounded-[24px] border border-dashed border-white/70 bg-white/70 p-4">
+                <p className="text-base font-semibold text-ink">{copy.buyUnavailableTitle}</p>
+                <p className="mt-2 text-sm leading-6 text-ink/65">{copy.buyUnavailableBody}</p>
+              </div>
+              <div className="mt-4 flex flex-wrap gap-3">
+                <Link
+                  className="inline-flex items-center justify-center rounded-full border border-white/70 bg-white/80 px-4 py-3 text-sm font-semibold text-ink"
+                  href="/wallet"
+                >
+                  {copy.sendAction}
+                </Link>
+                <a
+                  className="inline-flex items-center justify-center rounded-full border border-white/70 bg-white/80 px-4 py-3 text-sm font-semibold text-ink"
+                  href={token.explorerUrl}
+                  rel="noreferrer"
+                  target="_blank"
+                >
+                  {copy.explorerAction}
+                </a>
               </div>
             </Panel>
           )}

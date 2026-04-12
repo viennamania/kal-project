@@ -7,6 +7,7 @@ import { toPublicToken } from "@/lib/serializers";
 export const runtime = "nodejs";
 
 const tokenSchema = z.object({
+  buyEnabled: z.boolean().optional(),
   chainId: z.number().int().default(56),
   contractAddress: z.string().trim().min(10),
   description: z.string().trim().max(240).optional().nullable(),
@@ -62,6 +63,7 @@ export async function POST(request: Request) {
         name: token.name,
         ownerWallet: token.ownerWallet,
         description: token.description ?? null,
+        buyEnabled: token.buyEnabled ?? false,
         supply: token.supply,
         symbol: token.symbol
       },
