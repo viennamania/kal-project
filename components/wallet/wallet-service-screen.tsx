@@ -238,6 +238,20 @@ export function WalletServiceScreen() {
         transactionHash: result.transactionHash
       });
 
+      await fetch("/api/transfers", {
+        body: JSON.stringify({
+          amount,
+          fromWallet: account.address,
+          toWallet: selectedMember.walletAddress,
+          tokenAddress: selectedToken.contractAddress,
+          txHash: result.transactionHash
+        }),
+        headers: {
+          "Content-Type": "application/json"
+        },
+        method: "POST"
+      }).catch(() => undefined);
+
       await refreshBalances();
       setAmount("");
       setStatusMessage(
@@ -344,13 +358,31 @@ export function WalletServiceScreen() {
                     </div>
                   </div>
 
-                  <div className="w-full rounded-[24px] bg-bubble px-4 py-3 text-left sm:w-auto sm:text-right">
-                    <p className="text-xs uppercase tracking-[0.18em] text-ink/45">
-                      {wallet.myBalanceLabel}
-                    </p>
-                    <p className="mt-1 text-lg font-semibold text-ink">
-                      {account ? balances[token.contractAddress]?.displayValue ?? "0" : "-"}
-                    </p>
+                  <div className="w-full space-y-3 sm:w-auto">
+                    <div className="rounded-[24px] bg-bubble px-4 py-3 text-left sm:text-right">
+                      <p className="text-xs uppercase tracking-[0.18em] text-ink/45">
+                        {wallet.myBalanceLabel}
+                      </p>
+                      <p className="mt-1 text-lg font-semibold text-ink">
+                        {account ? balances[token.contractAddress]?.displayValue ?? "0" : "-"}
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap gap-2 sm:justify-end">
+                      <Link
+                        className="inline-flex items-center justify-center rounded-full border border-white/70 bg-white/80 px-3 py-2 text-xs font-semibold text-ink/80"
+                        href={`/tokens/${token.contractAddress}`}
+                      >
+                        {wallet.tokenDetailAction}
+                      </Link>
+                      {account?.address === token.ownerWallet ? (
+                        <Link
+                          className="inline-flex items-center justify-center rounded-full border border-white/70 bg-white/80 px-3 py-2 text-xs font-semibold text-ink/80"
+                          href={`/studio/${token.contractAddress}/manage`}
+                        >
+                          {wallet.tokenManageAction}
+                        </Link>
+                      ) : null}
+                    </div>
                   </div>
                 </div>
               </div>

@@ -183,10 +183,16 @@ export function HomeScreen() {
         transactionHash: mintResult.transactionHash
       });
 
-      const saveResponse = await fetch("/api/tokens", {
+          const saveResponse = await fetch("/api/tokens", {
         body: JSON.stringify({
           chainId: appChain.id,
           contractAddress,
+          description:
+            form.description ||
+            formatMessage(home.defaultDescriptionTemplate, {
+              brand: common.brand,
+              name: form.name.trim()
+            }),
           imageUrl: uploadPayload.url,
           mintTxHash: mintResult.transactionHash,
           name: form.name.trim(),
@@ -500,6 +506,20 @@ export function HomeScreen() {
                       {home.boardSavedPrefix}
                       {formatDate(token.deployedAt, intlLocale)}
                     </p>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <Link
+                        className="inline-flex items-center justify-center rounded-full border border-white/70 bg-white/80 px-3 py-2 text-xs font-semibold text-ink/80"
+                        href={`/tokens/${token.contractAddress}`}
+                      >
+                        {home.viewToken}
+                      </Link>
+                      <Link
+                        className="inline-flex items-center justify-center rounded-full border border-white/70 bg-white/80 px-3 py-2 text-xs font-semibold text-ink/80"
+                        href={`/studio/${token.contractAddress}/manage`}
+                      >
+                        {nav.manageCenter}
+                      </Link>
+                    </div>
                   </div>
                 ))
               ) : (
@@ -569,6 +589,22 @@ export function HomeScreen() {
                     <p>
                       {home.launchedLabel}: {formatDate(token.deployedAt, intlLocale)}
                     </p>
+                  </div>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <Link
+                      className="inline-flex items-center justify-center rounded-full border border-white/70 bg-white/80 px-3 py-2 text-xs font-semibold text-ink/80"
+                      href={`/tokens/${token.contractAddress}`}
+                    >
+                      {home.viewToken}
+                    </Link>
+                    {account?.address === token.ownerWallet ? (
+                      <Link
+                        className="inline-flex items-center justify-center rounded-full border border-white/70 bg-white/80 px-3 py-2 text-xs font-semibold text-ink/80"
+                        href={`/studio/${token.contractAddress}/manage`}
+                      >
+                        {nav.manageCenter}
+                      </Link>
+                    ) : null}
                   </div>
                 </div>
               ))}

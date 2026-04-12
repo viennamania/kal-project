@@ -131,11 +131,14 @@ const dictionaries = {
       supplyLabel: "발행량",
       symbolFieldLabel: "심볼",
       symbolFieldPlaceholder: "RANG",
+      viewToken: "토큰 상세 보기",
       tokenDeployFallbackError: "토큰 발행에 실패했습니다.",
       tokenSaveFailed: "토큰은 만들어졌지만 발행 기록 저장에 실패했습니다."
     },
     nav: {
       backToStudio: "스튜디오로 돌아가기",
+      manageCenter: "운영 센터",
+      tokenDetails: "토큰 상세",
       walletService: "지갑 서비스"
     },
     wallet: {
@@ -162,9 +165,11 @@ const dictionaries = {
       sendTitle: "회원을 검색하고 토큰 보내기",
       smartAccountNote: "이 지갑은 바로 사용할 수 있고, 보내기 수수료도 지원됩니다.",
       tokenCountSuffix: "개 토큰",
+      tokenDetailAction: "토큰 상세",
       tokenFieldLabel: "토큰",
       tokenListEyebrow: "커뮤니티 토큰 목록",
       tokenListTitle: "발행된 토큰 목록",
+      tokenManageAction: "운영 센터",
       transferFailed: "토큰 전송에 실패했습니다."
     }
   },
@@ -270,11 +275,14 @@ const dictionaries = {
       supplyLabel: "Supply",
       symbolFieldLabel: "Symbol",
       symbolFieldPlaceholder: "RANG",
+      viewToken: "View token details",
       tokenDeployFallbackError: "Token deployment failed.",
       tokenSaveFailed: "The token was created, but saving its launch record failed."
     },
     nav: {
       backToStudio: "Back to studio",
+      manageCenter: "Manage center",
+      tokenDetails: "Token details",
       walletService: "Wallet service"
     },
     wallet: {
@@ -301,9 +309,11 @@ const dictionaries = {
       sendTitle: "Search a member and transfer",
       smartAccountNote: "This wallet is ready to use, and sending fees are covered for you.",
       tokenCountSuffix: "tokens",
+      tokenDetailAction: "Details",
       tokenFieldLabel: "Token",
       tokenListEyebrow: "Community token list",
       tokenListTitle: "Issued tokens",
+      tokenManageAction: "Manage",
       transferFailed: "Token transfer failed."
     }
   },
@@ -409,11 +419,14 @@ const dictionaries = {
       supplyLabel: "供給量",
       symbolFieldLabel: "シンボル",
       symbolFieldPlaceholder: "RANG",
+      viewToken: "トークン詳細を見る",
       tokenDeployFallbackError: "トークンの発行に失敗しました。",
       tokenSaveFailed: "トークンは発行できましたが、発行履歴の保存に失敗しました。"
     },
     nav: {
       backToStudio: "スタジオへ戻る",
+      manageCenter: "運営センター",
+      tokenDetails: "トークン詳細",
       walletService: "ウォレットサービス"
     },
     wallet: {
@@ -440,9 +453,11 @@ const dictionaries = {
       sendTitle: "メンバーを検索してトークン送信",
       smartAccountNote: "このウォレットはすぐ使えて、送金手数料もサポートされています。",
       tokenCountSuffix: "トークン",
+      tokenDetailAction: "詳細",
       tokenFieldLabel: "トークン",
       tokenListEyebrow: "コミュニティトークン一覧",
       tokenListTitle: "発行済みトークン一覧",
+      tokenManageAction: "運営センター",
       transferFailed: "トークン送信に失敗しました。"
     }
   },
@@ -547,11 +562,14 @@ const dictionaries = {
       supplyLabel: "发行量",
       symbolFieldLabel: "符号",
       symbolFieldPlaceholder: "RANG",
+      viewToken: "查看代币详情",
       tokenDeployFallbackError: "代币发行失败。",
       tokenSaveFailed: "代币已创建，但保存发行记录失败。"
     },
     nav: {
       backToStudio: "返回工作室",
+      manageCenter: "运营中心",
+      tokenDetails: "代币详情",
       walletService: "钱包服务"
     },
     wallet: {
@@ -578,9 +596,11 @@ const dictionaries = {
       sendTitle: "搜索会员并发送代币",
       smartAccountNote: "这个钱包已经为你准备好，发送时的手续费也会得到支持。",
       tokenCountSuffix: "个代币",
+      tokenDetailAction: "详情",
       tokenFieldLabel: "代币",
       tokenListEyebrow: "社区代币列表",
       tokenListTitle: "已发行代币列表",
+      tokenManageAction: "运营中心",
       transferFailed: "代币发送失败。"
     }
   }

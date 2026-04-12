@@ -119,6 +119,7 @@ export interface PublicToken {
   name: string;
   owner: PublicUser | null;
   ownerWallet: string;
+  description?: string | null;
   supply: string;
   symbol: string;
 }
@@ -151,6 +152,16 @@ export interface PublicRewardLog {
   status: "claimed" | "failed" | "queued" | "sent";
   reason?: "attendance" | "mission" | "referral" | null;
   errorMessage?: string | null;
+  createdAt: string;
+}
+
+export interface PublicTransferLog {
+  id: string;
+  tokenAddress: string;
+  fromWallet: string;
+  toWallet: string;
+  amount: string;
+  txHash: string;
   createdAt: string;
 }
 

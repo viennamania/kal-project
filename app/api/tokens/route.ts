@@ -9,6 +9,7 @@ export const runtime = "nodejs";
 const tokenSchema = z.object({
   chainId: z.number().int().default(56),
   contractAddress: z.string().trim().min(10),
+  description: z.string().trim().max(240).optional().nullable(),
   deployTxHash: z.string().trim().optional().nullable(),
   imageUrl: z.string().url().optional().nullable(),
   mintTxHash: z.string().trim().optional().nullable(),
@@ -60,6 +61,7 @@ export async function POST(request: Request) {
         mintTxHash: token.mintTxHash ?? null,
         name: token.name,
         ownerWallet: token.ownerWallet,
+        description: token.description ?? null,
         supply: token.supply,
         symbol: token.symbol
       },

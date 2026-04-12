@@ -5,9 +5,11 @@ import type {
   PublicJobLog,
   PublicRewardLog,
   PublicToken,
+  PublicTransferLog,
   PublicUser,
   RewardLogDocument,
   TokenDocument,
+  TransferLogDocument,
   UserDocument
 } from "@/lib/types";
 import { maskPhone } from "@/lib/utils";
@@ -36,6 +38,7 @@ export function toPublicToken(token: TokenDocument, owner?: UserDocument | null)
     name: token.name,
     owner: owner ? toPublicUser(owner) : null,
     ownerWallet: token.ownerWallet,
+    description: token.description ?? null,
     supply: token.supply,
     symbol: token.symbol
   };
@@ -73,6 +76,18 @@ export function toPublicRewardLog(rewardLog: RewardLogDocument): PublicRewardLog
     reason: rewardLog.reason ?? null,
     errorMessage: rewardLog.errorMessage ?? null,
     createdAt: rewardLog.createdAt.toISOString()
+  };
+}
+
+export function toPublicTransferLog(transferLog: TransferLogDocument): PublicTransferLog {
+  return {
+    id: transferLog._id?.toString() ?? `${transferLog.tokenAddress}:${transferLog.txHash}`,
+    tokenAddress: transferLog.tokenAddress,
+    fromWallet: transferLog.fromWallet,
+    toWallet: transferLog.toWallet,
+    amount: transferLog.amount,
+    txHash: transferLog.txHash,
+    createdAt: transferLog.createdAt.toISOString()
   };
 }
 

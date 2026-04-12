@@ -54,6 +54,7 @@ async function ensureIndexes() {
         db.collection<CampaignDocument>("campaigns").createIndex({ ownerWallet: 1, createdAt: -1 }),
         db.collection<RewardLogDocument>("reward_logs").createIndex({ campaignId: 1, userWallet: 1 }),
         db.collection<RewardLogDocument>("reward_logs").createIndex({ tokenAddress: 1, createdAt: -1 }),
+        db.collection<TransferLogDocument>("transfer_logs").createIndex({ txHash: 1 }, { unique: true }),
         db.collection<TransferLogDocument>("transfer_logs").createIndex({ tokenAddress: 1, createdAt: -1 }),
         db.collection<TransferLogDocument>("transfer_logs").createIndex({ fromWallet: 1, createdAt: -1 }),
         db.collection<TransferLogDocument>("transfer_logs").createIndex({ toWallet: 1, createdAt: -1 }),
