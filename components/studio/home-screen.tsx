@@ -152,7 +152,9 @@ export function HomeScreen() {
               brand: common.brand,
               name: form.name.trim()
             }),
-          image: uploadPayload.url,
+          // Pass the original file to thirdweb so it uploads directly to storage
+          // instead of trying to re-download a freshly created external Blob URL.
+          image: form.image,
           name: form.name.trim(),
           symbol: form.symbol.trim().toUpperCase()
         },
