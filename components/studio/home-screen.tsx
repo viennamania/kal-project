@@ -3,7 +3,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { type ChangeEvent, type FormEvent, useEffect, useState } from "react";
-import { deployERC20Contract } from "thirdweb/deploys";
 import { getContract, sendTransaction, waitForReceipt } from "thirdweb";
 import { mintTo } from "thirdweb/extensions/erc20";
 import { useActiveAccount } from "thirdweb/react";
@@ -18,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Panel } from "@/components/ui/panel";
 import { Textarea } from "@/components/ui/textarea";
+import { deployTokenWithStableInfra } from "@/lib/deploy-token";
 import { formatMessage, getIntlLocale } from "@/lib/i18n";
 import { appChain, thirdwebClient } from "@/lib/thirdweb";
 import type { PublicToken } from "@/lib/types";
@@ -141,7 +141,7 @@ export function HomeScreen() {
 
       const uploadPayload = (await uploadResponse.json()) as { url: string };
 
-      const contractAddress = await deployERC20Contract({
+      const contractAddress = await deployTokenWithStableInfra({
         account,
         chain: appChain,
         client: thirdwebClient,
@@ -157,8 +157,7 @@ export function HomeScreen() {
           image: form.image,
           name: form.name.trim(),
           symbol: form.symbol.trim().toUpperCase()
-        },
-        type: "TokenERC20"
+        }
       });
 
       const contract = getContract({
