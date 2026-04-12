@@ -213,12 +213,12 @@ export function PhoneConnectModal({
         className="flex h-full min-h-screen min-h-dvh w-full flex-col bg-white sm:h-auto sm:max-h-[88dvh] sm:max-w-lg sm:overflow-hidden sm:rounded-[34px] sm:border sm:border-white/80 sm:shadow-[0_28px_70px_rgba(30,36,81,0.22)]"
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="sticky top-0 z-10 flex items-start justify-between gap-3 border-b border-slate-100 bg-white/98 px-4 pb-3 pt-[calc(env(safe-area-inset-top)+0.875rem)] backdrop-blur sm:gap-4 sm:border-b-0 sm:px-6 sm:pb-4 sm:pt-6">
+        <div className="sticky top-0 z-10 flex items-start justify-between gap-3 border-b border-slate-100 bg-white/98 px-4 pb-2.5 pt-[calc(env(safe-area-inset-top)+0.75rem)] backdrop-blur sm:gap-4 sm:border-b-0 sm:px-6 sm:pb-4 sm:pt-6">
           <div className="min-w-0 flex-1">
             <p className="text-sm font-semibold uppercase tracking-[0.22em] text-ink/45">
               {copy.modalTitle}
             </p>
-            <h2 className="mt-2 max-w-[10ch] font-display text-[1.45rem] leading-[1.08] text-ink sm:max-w-none sm:text-3xl sm:leading-tight">
+            <h2 className="mt-1.5 max-w-[10ch] font-display text-[1.35rem] leading-[1.06] text-ink sm:mt-2 sm:max-w-none sm:text-3xl sm:leading-tight">
               {step === "phone" ? copy.phoneStepTitle : copy.codeStepTitle}
             </h2>
           </div>
@@ -233,36 +233,36 @@ export function PhoneConnectModal({
           </button>
         </div>
 
-        <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-5 pt-1 sm:px-6 sm:pb-6">
+        <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-3.5 pt-1 sm:px-6 sm:pb-6">
           {step === "phone" ? (
             <>
               <p className="mt-3 hidden text-sm leading-6 text-ink/70 sm:block">
                 {copy.phoneStepDescription}
               </p>
 
-              <div className="mt-3 rounded-[20px] border border-candy/30 bg-candy/10 p-3 sm:mt-5 sm:rounded-[24px] sm:p-4">
-                <div className="flex items-start gap-3">
+              <div className="mt-2.5 rounded-[18px] border border-candy/30 bg-candy/10 p-2.5 sm:mt-5 sm:rounded-[24px] sm:p-4">
+                <div className="flex items-start gap-2.5 sm:gap-3">
                   <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white text-candy sm:h-9 sm:w-9">
                     <ShieldAlert className="h-4 w-4" />
                   </div>
                   <div className="min-w-0">
                     <p className="text-sm font-semibold text-ink">{copy.phoneNoticeTitle}</p>
-                    <p className="mt-1 text-[13px] leading-5 text-ink/70 sm:text-sm sm:leading-6">
+                    <p className="mt-0.5 text-[12px] leading-[1.45] text-ink/70 sm:mt-1 sm:text-sm sm:leading-6">
                       {copy.phoneNoticeBody}
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="mt-4 sm:mt-5">
-                <label className="mb-2 block text-sm font-semibold text-ink/70">
+              <div className="mt-3 sm:mt-5">
+                <label className="mb-1.5 block text-sm font-semibold text-ink/70 sm:mb-2">
                   {copy.phoneNumberLabel}
                 </label>
-                <div className="grid grid-cols-[92px_minmax(0,1fr)] gap-2.5 sm:grid-cols-[120px_1fr] sm:gap-3">
-                  <div className="flex h-12 items-center justify-center rounded-3xl border border-white/75 bg-bubble px-3 text-sm font-semibold text-ink sm:px-4">
+                <div className="grid grid-cols-[88px_minmax(0,1fr)] gap-2 sm:grid-cols-[120px_1fr] sm:gap-3">
+                  <div className="flex h-11 items-center justify-center rounded-3xl border border-white/75 bg-bubble px-3 text-sm font-semibold text-ink sm:h-12 sm:px-4">
                     KR {KR_DIALING_CODE}
                   </div>
-                  <div className="flex h-12 items-center overflow-hidden rounded-3xl border border-white/75 bg-white/80 focus-within:border-sky focus-within:bg-white focus-within:ring-4 focus-within:ring-sky/20">
+                  <div className="flex h-11 items-center overflow-hidden rounded-3xl border border-white/75 bg-white/80 focus-within:border-sky focus-within:bg-white focus-within:ring-4 focus-within:ring-sky/20 sm:h-12">
                     <span className="pl-3 pr-2.5 text-base font-semibold text-ink sm:pl-4 sm:pr-3">
                       0
                     </span>
@@ -289,7 +289,7 @@ export function PhoneConnectModal({
                     />
                   </div>
                 </div>
-                <p className="mt-2 text-xs leading-5 text-ink/50">
+                <p className="mt-1.5 text-[11px] leading-4 text-ink/50 sm:mt-2 sm:text-xs sm:leading-5">
                   {formatMessage(copy.phoneNumberHint, {
                     example: copy.phoneNumberPlaceholder
                   })}
@@ -297,7 +297,7 @@ export function PhoneConnectModal({
               </div>
 
               {errorMessage ? (
-                <div className="mt-4 rounded-3xl border border-candy/30 bg-candy/10 px-4 py-3 text-sm text-ink">
+                <div className="mt-3 rounded-3xl border border-candy/30 bg-candy/10 px-4 py-2.5 text-sm text-ink">
                   {errorMessage}
                 </div>
               ) : null}
@@ -305,7 +305,7 @@ export function PhoneConnectModal({
           ) : (
             <>
               <button
-                className="mt-4 inline-flex items-center gap-2 self-start text-sm font-semibold text-ink/65 transition hover:text-ink"
+                className="mt-3 inline-flex items-center gap-2 self-start text-sm font-semibold text-ink/65 transition hover:text-ink sm:mt-4"
                 disabled={isBusy}
                 onClick={() => {
                   setErrorMessage(null);
@@ -317,14 +317,14 @@ export function PhoneConnectModal({
                 {copy.backLabel}
               </button>
 
-              <p className="mt-4 text-sm leading-6 text-ink/70">
+              <p className="mt-3 text-sm leading-6 text-ink/70 sm:mt-4">
                 {formatMessage(copy.codeStepDescription, {
                   phone: formatPhonePreview(localPhoneNumber)
                 })}
               </p>
 
-              <div className="mt-5">
-                <label className="mb-2 block text-sm font-semibold text-ink/70">
+              <div className="mt-4 sm:mt-5">
+                <label className="mb-1.5 block text-sm font-semibold text-ink/70 sm:mb-2">
                   {copy.verificationCodeLabel}
                 </label>
                 <Input
@@ -346,7 +346,7 @@ export function PhoneConnectModal({
                 />
               </div>
 
-              <div className="mt-4 rounded-[24px] bg-bubble px-4 py-3 text-sm text-ink/70">
+              <div className="mt-3 rounded-[24px] bg-bubble px-4 py-2.5 text-sm text-ink/70 sm:mt-4 sm:py-3">
                 {countdown > 0 ? (
                   <p>{formatMessage(copy.resendCountdown, { seconds: countdown })}</p>
                 ) : (
@@ -362,7 +362,7 @@ export function PhoneConnectModal({
               </div>
 
               {errorMessage ? (
-                <div className="mt-4 rounded-3xl border border-candy/30 bg-candy/10 px-4 py-3 text-sm text-ink">
+                <div className="mt-3 rounded-3xl border border-candy/30 bg-candy/10 px-4 py-2.5 text-sm text-ink sm:mt-4 sm:py-3">
                   {errorMessage}
                 </div>
               ) : null}
@@ -370,13 +370,13 @@ export function PhoneConnectModal({
           )}
         </div>
 
-        <div className="border-t border-slate-100 bg-white/98 px-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-4 backdrop-blur sm:border-t-white/70 sm:px-6 sm:pb-6">
+        <div className="border-t border-slate-100 bg-white/98 px-4 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] pt-2.5 backdrop-blur sm:border-t-white/70 sm:px-6 sm:pb-6 sm:pt-4">
           {step === "phone" ? (
-            <div className="grid gap-3 sm:grid-cols-2">
-              <Button onClick={closeModal} type="button" variant="ghost">
+            <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3">
+              <Button className="hidden sm:inline-flex" onClick={closeModal} type="button" variant="ghost">
                 {copy.cancelLabel}
               </Button>
-              <Button disabled={isBusy} onClick={() => void sendCode()} type="button">
+              <Button className="w-full" disabled={isBusy} onClick={() => void sendCode()} type="button">
                 {isSendingCode ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -388,8 +388,9 @@ export function PhoneConnectModal({
               </Button>
             </div>
           ) : (
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3">
               <Button
+                className="hidden sm:inline-flex"
                 disabled={isBusy}
                 onClick={() => {
                   setErrorMessage(null);
@@ -400,7 +401,7 @@ export function PhoneConnectModal({
               >
                 {copy.editPhoneButton}
               </Button>
-              <Button disabled={isBusy} onClick={() => void verifyCode()} type="button">
+              <Button className="w-full" disabled={isBusy} onClick={() => void verifyCode()} type="button">
                 {isConnecting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
