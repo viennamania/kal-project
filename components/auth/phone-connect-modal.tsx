@@ -58,6 +58,7 @@ export function PhoneConnectModal({
   const [step, setStep] = useState<ConnectStep>("phone");
   const [subscriberPhoneNumber, setSubscriberPhoneNumber] = useState("");
   const [verificationCode, setVerificationCode] = useState("");
+  const [viewportHeight, setViewportHeight] = useState<number | null>(null);
 
   const isBusy = isConnecting || isSendingCode;
   const localPhoneNumber = subscriberPhoneNumber ? `0${subscriberPhoneNumber}` : "";
@@ -102,6 +103,26 @@ export function PhoneConnectModal({
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    function updateViewportHeight() {
+      const nextHeight = window.visualViewport?.height ?? window.innerHeight;
+      setViewportHeight(Math.round(nextHeight));
+    }
+
+    updateViewportHeight();
+    window.addEventListener("resize", updateViewportHeight);
+    window.visualViewport?.addEventListener("resize", updateViewportHeight);
+
+    return () => {
+      window.removeEventListener("resize", updateViewportHeight);
+      window.visualViewport?.removeEventListener("resize", updateViewportHeight);
+    };
+  }, [open]);
 
   useEffect(() => {
     if (!open) {
@@ -210,8 +231,15 @@ export function PhoneConnectModal({
       onClick={closeModal}
     >
       <div
-        className="flex h-full min-h-screen min-h-dvh w-full flex-col bg-white sm:h-auto sm:max-h-[88dvh] sm:max-w-lg sm:overflow-hidden sm:rounded-[34px] sm:border sm:border-white/80 sm:shadow-[0_28px_70px_rgba(30,36,81,0.22)]"
+        className="flex h-[var(--phone-modal-height,100dvh)] w-full flex-col bg-white sm:h-auto sm:max-h-[88dvh] sm:max-w-lg sm:overflow-hidden sm:rounded-[34px] sm:border sm:border-white/80 sm:shadow-[0_28px_70px_rgba(30,36,81,0.22)]"
         onClick={(event) => event.stopPropagation()}
+        style={
+          viewportHeight
+            ? {
+                ["--phone-modal-height" as string]: `${viewportHeight}px`
+              }
+            : undefined
+        }
       >
         <div className="sticky top-0 z-10 flex items-start justify-between gap-3 border-b border-slate-100 bg-white/98 px-4 pb-2.5 pt-[calc(env(safe-area-inset-top)+0.75rem)] backdrop-blur sm:gap-4 sm:border-b-0 sm:px-6 sm:pb-4 sm:pt-6">
           <div className="min-w-0 flex-1">
