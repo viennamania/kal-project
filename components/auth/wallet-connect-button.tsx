@@ -1,42 +1,54 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Loader2, LogOut, ShieldCheck } from "lucide-react";
+import { Loader2, LogOut, Phone, ShieldCheck } from "lucide-react";
 import {
-  ConnectButton,
-  lightTheme,
+  AutoConnect,
   useActiveAccount,
   useActiveWallet,
   useActiveWalletConnectionStatus,
   useDisconnect
 } from "thirdweb/react";
 
+import { PhoneConnectModal } from "@/components/auth/phone-connect-modal";
 import { useWalletMember } from "@/components/providers/wallet-member-provider";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useLocale } from "@/components/providers/locale-provider";
-import { getThirdwebLocale } from "@/lib/i18n";
 import { publicEnv } from "@/lib/public-env";
 import { appChain, phoneWallet, thirdwebClient } from "@/lib/thirdweb";
 import { shortenAddress } from "@/lib/utils";
 
 export function WalletConnectButton() {
-  const { dictionary, locale } = useLocale();
+  const { dictionary } = useLocale();
   const { member, status: memberStatus } = useWalletMember();
   const account = useActiveAccount();
   const activeWallet = useActiveWallet();
   const connectionStatus = useActiveWalletConnectionStatus();
   const { disconnect } = useDisconnect();
   const connect = dictionary.connect;
+  const [isConnectOpen, setIsConnectOpen] = useState(false);
   const [disconnectError, setDisconnectError] = useState<string | null>(null);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isDisconnecting, setIsDisconnecting] = useState(false);
+  const appMetadata = {
+    description: connect.appDescription,
+    logoUrl: "/mascot-orbit.svg",
+    name: dictionary.common.brand,
+    url: publicEnv.NEXT_PUBLIC_APP_URL
+  };
 
   useEffect(() => {
     if (connectionStatus !== "connected") {
       setIsConfirmOpen(false);
       setDisconnectError(null);
       setIsDisconnecting(false);
+    }
+  }, [connectionStatus]);
+
+  useEffect(() => {
+    if (connectionStatus === "connected") {
+      setIsConnectOpen(false);
     }
   }, [connectionStatus]);
 
@@ -70,6 +82,13 @@ export function WalletConnectButton() {
 
     return (
       <>
+        <AutoConnect
+          appMetadata={appMetadata}
+          chain={appChain}
+          client={thirdwebClient}
+          timeout={15000}
+          wallets={[phoneWallet]}
+        />
         <div className="grid w-full gap-3 sm:flex sm:w-auto sm:items-center">
           <div className="min-w-0 rounded-[28px] border border-white/75 bg-white/85 px-4 py-3 shadow-[0_14px_28px_rgba(30,36,81,0.08)]">
             <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-ink/45">
@@ -123,64 +142,39 @@ export function WalletConnectButton() {
 
   if (connectionStatus === "connecting") {
     return (
-      <div className="inline-flex min-h-12 items-center justify-center rounded-full border border-white/70 bg-white/85 px-4 py-3 text-sm font-semibold text-ink/70 shadow-[0_12px_22px_rgba(30,36,81,0.08)]">
-        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-        {connect.connectingStatus}
-      </div>
+      <>
+        <AutoConnect
+          appMetadata={appMetadata}
+          chain={appChain}
+          client={thirdwebClient}
+          timeout={15000}
+          wallets={[phoneWallet]}
+        />
+        <div className="inline-flex min-h-12 items-center justify-center rounded-full border border-white/70 bg-white/85 px-4 py-3 text-sm font-semibold text-ink/70 shadow-[0_12px_22px_rgba(30,36,81,0.08)]">
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          {connect.connectingStatus}
+        </div>
+      </>
     );
   }
 
   return (
-    <ConnectButton
-      appMetadata={{
-        description: connect.appDescription,
-        logoUrl: "/mascot-orbit.svg",
-        name: dictionary.common.brand,
-        url: publicEnv.NEXT_PUBLIC_APP_URL
-      }}
-      autoConnect={{ timeout: 15000 }}
-      chain={appChain}
-      client={thirdwebClient}
-      connectButton={{
-        className:
-          "!min-h-12 !rounded-full !bg-[#1E2451] !px-5 !py-3 !text-base !font-semibold !text-white !shadow-[0_18px_32px_rgba(30,36,81,0.22)] sm:!text-sm"
-      }}
-      connectModal={{
-        showThirdwebBranding: false,
-        size: "wide",
-        title: connect.modalTitle,
-        welcomeScreen: {
-          subtitle: connect.welcomeSubtitle,
-          title: connect.welcomeTitle,
-          img: {
-            src: "/mascot-orbit.svg",
-            width: 200,
-            height: 200
-          }
-        }
-      }}
-      locale={getThirdwebLocale(locale)}
-      theme={lightTheme({
-        colors: {
-          accentButtonBg: "#1E2451",
-          accentButtonText: "#ffffff",
-          borderColor: "#d9e7ff",
-          connectedButtonBg: "#ffffff",
-          connectedButtonBgHover: "#f8fbff",
-          modalBg: "#fdfcff",
-          primaryButtonBg: "#FF6FA8",
-          primaryButtonText: "#ffffff",
-          secondaryButtonBg: "#eef7ff",
-          secondaryButtonText: "#1E2451",
-          separatorLine: "#e4efff",
-          skeletonBg: "#eef7ff",
-          success: "#0ea969",
-          tertiaryBg: "#ffffff",
-          tooltipBg: "#1E2451",
-          tooltipText: "#ffffff"
-        }
-      })}
-      wallets={[phoneWallet]}
-    />
+    <>
+      <AutoConnect
+        appMetadata={appMetadata}
+        chain={appChain}
+        client={thirdwebClient}
+        timeout={15000}
+        wallets={[phoneWallet]}
+      />
+      <Button className="min-h-12 sm:min-h-0" onClick={() => setIsConnectOpen(true)} type="button">
+        <Phone className="mr-2 h-4 w-4" />
+        {connect.connectButtonLabel}
+      </Button>
+      <PhoneConnectModal
+        onClose={() => setIsConnectOpen(false)}
+        open={isConnectOpen}
+      />
+    </>
   );
 }
