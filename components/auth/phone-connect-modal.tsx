@@ -14,7 +14,14 @@ import { appChain, phoneWallet, thirdwebClient } from "@/lib/thirdweb";
 const KR_DIALING_CODE = "+82";
 
 function sanitizeDigits(value: string) {
-  return value.replace(/\D/g, "").slice(0, 11);
+  return value.replace(/\D/g, "");
+}
+
+function sanitizeSubscriberDigits(value: string) {
+  const digits = sanitizeDigits(value);
+  const withoutLeadingZero = digits.startsWith("0") ? digits.slice(1) : digits;
+
+  return withoutLeadingZero.slice(0, 10);
 }
 
 function formatPhonePreview(value: string) {
@@ -46,18 +53,22 @@ export function PhoneConnectModal({
   const [countdown, setCountdown] = useState(0);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSendingCode, setIsSendingCode] = useState(false);
-  const [localPhoneNumber, setLocalPhoneNumber] = useState("");
   const [step, setStep] = useState<ConnectStep>("phone");
+  const [subscriberPhoneNumber, setSubscriberPhoneNumber] = useState("");
   const [verificationCode, setVerificationCode] = useState("");
 
   const isBusy = isConnecting || isSendingCode;
+  const localPhoneNumber = subscriberPhoneNumber ? `0${subscriberPhoneNumber}` : "";
+  const phoneNumberPlaceholder = copy.phoneNumberPlaceholder.startsWith("0")
+    ? copy.phoneNumberPlaceholder.slice(1)
+    : copy.phoneNumberPlaceholder;
 
   function resetState() {
     setCountdown(0);
     setErrorMessage(null);
     setIsSendingCode(false);
-    setLocalPhoneNumber("");
     setStep("phone");
+    setSubscriberPhoneNumber("");
     setVerificationCode("");
   }
 
@@ -188,15 +199,15 @@ export function PhoneConnectModal({
   return (
     <div
       aria-modal="true"
-      className="fixed inset-0 z-[95] flex items-end justify-center bg-[#1E2451]/35 p-4 backdrop-blur-sm sm:items-center"
+      className="fixed inset-0 z-[95] flex items-end justify-center overflow-y-auto bg-[#1E2451]/35 px-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] pt-6 backdrop-blur-sm sm:items-center sm:p-4"
       role="dialog"
       onClick={closeModal}
     >
       <div
-        className="w-full max-w-lg rounded-[34px] border border-white/80 bg-white p-5 shadow-[0_28px_70px_rgba(30,36,81,0.22)] sm:p-6"
+        className="flex max-h-[calc(100dvh-0.75rem)] w-full max-w-lg flex-col overflow-hidden rounded-[34px] border border-white/80 bg-white shadow-[0_28px_70px_rgba(30,36,81,0.22)] sm:max-h-[88dvh]"
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="flex items-start justify-between gap-4">
+        <div className="sticky top-0 z-10 flex items-start justify-between gap-4 bg-white/95 px-5 pb-4 pt-5 backdrop-blur sm:px-6 sm:pb-4 sm:pt-6">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.22em] text-ink/45">
               {copy.modalTitle}
@@ -216,62 +227,142 @@ export function PhoneConnectModal({
           </button>
         </div>
 
-        {step === "phone" ? (
-          <>
-            <p className="mt-4 text-sm leading-6 text-ink/70">{copy.phoneStepDescription}</p>
+        <div className="overflow-y-auto px-5 pb-5 sm:px-6 sm:pb-6">
+          {step === "phone" ? (
+            <>
+              <p className="mt-4 text-sm leading-6 text-ink/70">{copy.phoneStepDescription}</p>
 
-            <div className="mt-5 rounded-[28px] border border-candy/30 bg-candy/10 p-4">
-              <div className="flex items-start gap-3">
-                <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-candy">
-                  <ShieldAlert className="h-5 w-5" />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-ink">{copy.phoneNoticeTitle}</p>
-                  <p className="mt-1 text-sm leading-6 text-ink/70">{copy.phoneNoticeBody}</p>
+              <div className="mt-5 rounded-[24px] border border-candy/30 bg-candy/10 p-3.5 sm:p-4">
+                <div className="flex items-start gap-3">
+                  <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-candy">
+                    <ShieldAlert className="h-4 w-4" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-ink">{copy.phoneNoticeTitle}</p>
+                    <p className="mt-1 text-[13px] leading-5 text-ink/70 sm:text-sm sm:leading-6">
+                      {copy.phoneNoticeBody}
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div className="mt-5">
-              <label className="mb-2 block text-sm font-semibold text-ink/70">
-                {copy.phoneNumberLabel}
-              </label>
-              <div className="grid gap-3 sm:grid-cols-[130px_1fr]">
-                <div className="flex h-12 items-center justify-center rounded-3xl border border-white/75 bg-bubble px-4 text-sm font-semibold text-ink">
-                  KR {KR_DIALING_CODE}
+              <div className="mt-5">
+                <label className="mb-2 block text-sm font-semibold text-ink/70">
+                  {copy.phoneNumberLabel}
+                </label>
+                <div className="grid grid-cols-[104px_minmax(0,1fr)] gap-3 sm:grid-cols-[130px_1fr]">
+                  <div className="flex h-12 items-center justify-center rounded-3xl border border-white/75 bg-bubble px-4 text-sm font-semibold text-ink">
+                    KR {KR_DIALING_CODE}
+                  </div>
+                  <div className="flex h-12 items-center overflow-hidden rounded-3xl border border-white/75 bg-white/80 focus-within:border-sky focus-within:bg-white focus-within:ring-4 focus-within:ring-sky/20">
+                    <span className="pl-4 pr-3 text-base font-semibold text-ink">0</span>
+                    <span className="h-5 w-px bg-slate-200" />
+                    <Input
+                      autoComplete="tel-national"
+                      className="rounded-none border-0 bg-transparent pl-3 pr-4 focus:border-transparent focus:bg-transparent focus:ring-0 sm:text-base"
+                      inputMode="numeric"
+                      maxLength={10}
+                      onChange={(event) => {
+                        setErrorMessage(null);
+                        setSubscriberPhoneNumber(
+                          sanitizeSubscriberDigits(event.target.value)
+                        );
+                      }}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter") {
+                          event.preventDefault();
+                          void sendCode();
+                        }
+                      }}
+                      placeholder={phoneNumberPlaceholder}
+                      value={subscriberPhoneNumber}
+                    />
+                  </div>
                 </div>
+                <p className="mt-2 text-xs leading-5 text-ink/50">
+                  {formatMessage(copy.phoneNumberHint, {
+                    example: copy.phoneNumberPlaceholder
+                  })}
+                </p>
+              </div>
+
+              {errorMessage ? (
+                <div className="mt-4 rounded-3xl border border-candy/30 bg-candy/10 px-4 py-3 text-sm text-ink">
+                  {errorMessage}
+                </div>
+              ) : null}
+            </>
+          ) : (
+            <>
+              <button
+                className="mt-4 inline-flex items-center gap-2 self-start text-sm font-semibold text-ink/65 transition hover:text-ink"
+                disabled={isBusy}
+                onClick={() => {
+                  setErrorMessage(null);
+                  setStep("phone");
+                }}
+                type="button"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                {copy.backLabel}
+              </button>
+
+              <p className="mt-4 text-sm leading-6 text-ink/70">
+                {formatMessage(copy.codeStepDescription, {
+                  phone: formatPhonePreview(localPhoneNumber)
+                })}
+              </p>
+
+              <div className="mt-5">
+                <label className="mb-2 block text-sm font-semibold text-ink/70">
+                  {copy.verificationCodeLabel}
+                </label>
                 <Input
-                  autoComplete="tel-national"
+                  autoComplete="one-time-code"
                   inputMode="numeric"
-                  maxLength={11}
+                  maxLength={6}
                   onChange={(event) => {
                     setErrorMessage(null);
-                    setLocalPhoneNumber(sanitizeDigits(event.target.value));
+                    setVerificationCode(sanitizeDigits(event.target.value).slice(0, 6));
                   }}
                   onKeyDown={(event) => {
                     if (event.key === "Enter") {
                       event.preventDefault();
-                      void sendCode();
+                      void verifyCode();
                     }
                   }}
-                  placeholder={copy.phoneNumberPlaceholder}
-                  value={localPhoneNumber}
+                  placeholder={copy.verificationCodePlaceholder}
+                  value={verificationCode}
                 />
               </div>
-              <p className="mt-2 text-xs text-ink/50">
-                {formatMessage(copy.phoneNumberHint, {
-                  example: copy.phoneNumberPlaceholder
-                })}
-              </p>
-            </div>
 
-            {errorMessage ? (
-              <div className="mt-4 rounded-3xl border border-candy/30 bg-candy/10 px-4 py-3 text-sm text-ink">
-                {errorMessage}
+              <div className="mt-4 rounded-[24px] bg-bubble px-4 py-3 text-sm text-ink/70">
+                {countdown > 0 ? (
+                  <p>{formatMessage(copy.resendCountdown, { seconds: countdown })}</p>
+                ) : (
+                  <button
+                    className="font-semibold text-ink"
+                    disabled={isBusy}
+                    onClick={() => void sendCode()}
+                    type="button"
+                  >
+                    {copy.resendCodeButton}
+                  </button>
+                )}
               </div>
-            ) : null}
 
-            <div className="mt-6 grid gap-3 sm:grid-cols-2">
+              {errorMessage ? (
+                <div className="mt-4 rounded-3xl border border-candy/30 bg-candy/10 px-4 py-3 text-sm text-ink">
+                  {errorMessage}
+                </div>
+              ) : null}
+            </>
+          )}
+        </div>
+
+        <div className="border-t border-white/70 bg-white/95 px-5 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-4 backdrop-blur sm:px-6 sm:pb-6">
+          {step === "phone" ? (
+            <div className="grid gap-3 sm:grid-cols-2">
               <Button onClick={closeModal} type="button" variant="ghost">
                 {copy.cancelLabel}
               </Button>
@@ -286,73 +377,8 @@ export function PhoneConnectModal({
                 )}
               </Button>
             </div>
-          </>
-        ) : (
-          <>
-            <button
-              className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-ink/65 transition hover:text-ink"
-              disabled={isBusy}
-              onClick={() => {
-                setErrorMessage(null);
-                setStep("phone");
-              }}
-              type="button"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              {copy.backLabel}
-            </button>
-
-            <p className="mt-4 text-sm leading-6 text-ink/70">
-              {formatMessage(copy.codeStepDescription, {
-                phone: formatPhonePreview(localPhoneNumber)
-              })}
-            </p>
-
-            <div className="mt-5">
-              <label className="mb-2 block text-sm font-semibold text-ink/70">
-                {copy.verificationCodeLabel}
-              </label>
-              <Input
-                autoComplete="one-time-code"
-                inputMode="numeric"
-                maxLength={6}
-                onChange={(event) => {
-                  setErrorMessage(null);
-                  setVerificationCode(sanitizeDigits(event.target.value).slice(0, 6));
-                }}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter") {
-                    event.preventDefault();
-                    void verifyCode();
-                  }
-                }}
-                placeholder={copy.verificationCodePlaceholder}
-                value={verificationCode}
-              />
-            </div>
-
-            <div className="mt-4 rounded-[24px] bg-bubble px-4 py-3 text-sm text-ink/70">
-              {countdown > 0 ? (
-                <p>{formatMessage(copy.resendCountdown, { seconds: countdown })}</p>
-              ) : (
-                <button
-                  className="font-semibold text-ink"
-                  disabled={isBusy}
-                  onClick={() => void sendCode()}
-                  type="button"
-                >
-                  {copy.resendCodeButton}
-                </button>
-              )}
-            </div>
-
-            {errorMessage ? (
-              <div className="mt-4 rounded-3xl border border-candy/30 bg-candy/10 px-4 py-3 text-sm text-ink">
-                {errorMessage}
-              </div>
-            ) : null}
-
-            <div className="mt-6 grid gap-3 sm:grid-cols-2">
+          ) : (
+            <div className="grid gap-3 sm:grid-cols-2">
               <Button
                 disabled={isBusy}
                 onClick={() => {
@@ -375,8 +401,8 @@ export function PhoneConnectModal({
                 )}
               </Button>
             </div>
-          </>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );
