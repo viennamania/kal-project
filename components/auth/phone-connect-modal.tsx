@@ -199,20 +199,20 @@ export function PhoneConnectModal({
   return (
     <div
       aria-modal="true"
-      className="fixed inset-0 z-[95] flex items-end justify-center overflow-y-auto bg-[#1E2451]/35 px-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] pt-6 backdrop-blur-sm sm:items-center sm:p-4"
+      className="fixed inset-0 z-[95] flex bg-[#1E2451]/45 backdrop-blur-sm sm:items-center sm:justify-center sm:p-4"
       role="dialog"
       onClick={closeModal}
     >
       <div
-        className="flex max-h-[calc(100dvh-0.75rem)] w-full max-w-lg flex-col overflow-hidden rounded-[34px] border border-white/80 bg-white shadow-[0_28px_70px_rgba(30,36,81,0.22)] sm:max-h-[88dvh]"
+        className="flex h-[100svh] w-full flex-col bg-white sm:h-auto sm:max-h-[88dvh] sm:max-w-lg sm:overflow-hidden sm:rounded-[34px] sm:border sm:border-white/80 sm:shadow-[0_28px_70px_rgba(30,36,81,0.22)]"
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="sticky top-0 z-10 flex items-start justify-between gap-4 bg-white/95 px-5 pb-4 pt-5 backdrop-blur sm:px-6 sm:pb-4 sm:pt-6">
+        <div className="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-slate-100 bg-white/98 px-5 pb-4 pt-[calc(env(safe-area-inset-top)+1rem)] backdrop-blur sm:border-b-0 sm:px-6 sm:pb-4 sm:pt-6">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.22em] text-ink/45">
               {copy.modalTitle}
             </p>
-            <h2 className="mt-2 font-display text-3xl leading-tight text-ink">
+            <h2 className="mt-2 font-display text-[1.9rem] leading-tight text-ink sm:text-3xl">
               {step === "phone" ? copy.phoneStepTitle : copy.codeStepTitle}
             </h2>
           </div>
@@ -227,12 +227,12 @@ export function PhoneConnectModal({
           </button>
         </div>
 
-        <div className="overflow-y-auto px-5 pb-5 sm:px-6 sm:pb-6">
+        <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-5 pt-1 sm:px-6 sm:pb-6">
           {step === "phone" ? (
             <>
               <p className="mt-4 text-sm leading-6 text-ink/70">{copy.phoneStepDescription}</p>
 
-              <div className="mt-5 rounded-[24px] border border-candy/30 bg-candy/10 p-3.5 sm:p-4">
+              <div className="mt-4 rounded-[24px] border border-candy/30 bg-candy/10 p-3.5 sm:mt-5 sm:p-4">
                 <div className="flex items-start gap-3">
                   <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-candy">
                     <ShieldAlert className="h-4 w-4" />
@@ -250,7 +250,7 @@ export function PhoneConnectModal({
                 <label className="mb-2 block text-sm font-semibold text-ink/70">
                   {copy.phoneNumberLabel}
                 </label>
-                <div className="grid grid-cols-[104px_minmax(0,1fr)] gap-3 sm:grid-cols-[130px_1fr]">
+                <div className="grid gap-3 min-[420px]:grid-cols-[104px_minmax(0,1fr)] sm:grid-cols-[130px_1fr]">
                   <div className="flex h-12 items-center justify-center rounded-3xl border border-white/75 bg-bubble px-4 text-sm font-semibold text-ink">
                     KR {KR_DIALING_CODE}
                   </div>
@@ -360,7 +360,7 @@ export function PhoneConnectModal({
           )}
         </div>
 
-        <div className="border-t border-white/70 bg-white/95 px-5 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-4 backdrop-blur sm:px-6 sm:pb-6">
+        <div className="border-t border-slate-100 bg-white/98 px-5 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-4 backdrop-blur sm:border-t-white/70 sm:px-6 sm:pb-6">
           {step === "phone" ? (
             <div className="grid gap-3 sm:grid-cols-2">
               <Button onClick={closeModal} type="button" variant="ghost">
