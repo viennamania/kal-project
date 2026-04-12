@@ -19,7 +19,7 @@ const bodyFont = Plus_Jakarta_Sans({
 export const metadata: Metadata = {
   description:
     "Phone-first BSC token studio powered by thirdweb smart accounts, Vercel Blob, and MongoDB Atlas.",
-  title: "Kal Token Arcade"
+  title: "Oasis Token Arcade"
 };
 
 export default function RootLayout({

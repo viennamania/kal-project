@@ -13,7 +13,7 @@ export const thirdwebClient = createThirdwebClient({
 export const appMetadata = {
   description: "Phone-first BSC token studio for playful product launches.",
   logoUrl: `${publicEnv.NEXT_PUBLIC_APP_URL}/mascot-orbit.svg`,
-  name: "Kal Token Arcade",
+  name: "Oasis Token Arcade",
   url: publicEnv.NEXT_PUBLIC_APP_URL
 };
 
@@ -33,11 +33,11 @@ export const phoneWallet = inAppWallet({
   hidePrivateKeyExport: true,
   metadata: {
     image: {
-      alt: "Kal mascot",
+      alt: "Oasis mascot",
       height: 220,
       src: "/mascot-orbit.svg",
       width: 220
     },
-    name: "Kal Token Arcade"
+    name: "Oasis Token Arcade"
   }
 });

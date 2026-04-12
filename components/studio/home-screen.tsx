@@ -137,7 +137,7 @@ export function HomeScreen() {
         chain: appChain,
         client: thirdwebClient,
         params: {
-          description: form.description || `${form.name} token launched from Kal Token Arcade`,
+          description: form.description || `${form.name} token launched from Oasis Token Arcade`,
           image: uploadPayload.url,
           name: form.name.trim(),
           symbol: form.symbol.trim().toUpperCase()
@@ -214,10 +214,10 @@ export function HomeScreen() {
         <header className="mb-6 flex flex-col gap-4 rounded-[36px] border border-white/70 bg-white/70 px-5 py-4 shadow-bubble backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-4">
             <div className="flex h-14 w-14 items-center justify-center rounded-[20px] bg-gradient-to-br from-sky to-candy shadow-soft">
-              <Image alt="Kal mascot" height={44} src="/mascot-orbit.svg" width={44} />
+              <Image alt="Oasis mascot" height={44} src="/mascot-orbit.svg" width={44} />
             </div>
             <div>
-              <p className="font-display text-2xl text-ink">Kal Token Arcade</p>
+              <p className="font-display text-2xl text-ink">Oasis Token Arcade</p>
               <p className="text-sm text-ink/65">
                 Phone-first ERC20 launcher with smart accounts on BSC
               </p>
