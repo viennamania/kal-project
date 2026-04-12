@@ -1,0 +1,26 @@
+import { MongoClient, ServerApiVersion } from "mongodb";
+
+import { env } from "../config/env.js";
+
+declare global {
+  var __oasisWorkerMongoClientPromise: Promise<MongoClient> | undefined;
+}
+
+const clientPromise =
+  global.__oasisWorkerMongoClientPromise ??
+  new MongoClient(env.MONGODB_URI, {
+    serverApi: {
+      version: ServerApiVersion.v1,
+      strict: true,
+      deprecationErrors: true
+    }
+  }).connect();
+
+if (!global.__oasisWorkerMongoClientPromise) {
+  global.__oasisWorkerMongoClientPromise = clientPromise;
+}
+
+export async function getDatabase() {
+  const client = await clientPromise;
+  return client.db(env.MONGODB_DB_NAME);
+}
