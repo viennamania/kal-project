@@ -39,6 +39,16 @@ const dictionaries = {
     },
     connect: {
       appDescription: "전화번호 로그인으로 토큰을 쉽게 만들고 보낼 수 있는 서비스",
+      connectedHint: "전화번호 지갑이 준비되어 있어요",
+      connectedStatus: "지갑 연결됨",
+      connectingStatus: "지갑 상태 확인 중...",
+      disconnectButton: "지갑 연결 해제",
+      disconnectCancel: "계속 연결",
+      disconnectConfirm: "연결 해제",
+      disconnectingStatus: "연결 해제 중...",
+      disconnectDescription:
+        "이 기기에서 지갑 연결을 해제합니다. 다시 쓰려면 전화번호로 다시 연결해야 합니다.",
+      disconnectTitle: "지갑 연결을 해제할까요?",
       modalTitle: "전화번호로 연결",
       welcomeSubtitle: "모든 회원에게 바로 쓸 수 있는 지갑과 수수료 지원을 제공합니다",
       welcomeTitle: "오아시스 토큰 아케이드 입장"
@@ -138,6 +148,16 @@ const dictionaries = {
     },
     connect: {
       appDescription: "Create and send tokens with phone login and a ready-to-use wallet",
+      connectedHint: "Your phone wallet is ready to use",
+      connectedStatus: "Wallet connected",
+      connectingStatus: "Checking wallet status...",
+      disconnectButton: "Disconnect wallet",
+      disconnectCancel: "Keep connected",
+      disconnectConfirm: "Disconnect",
+      disconnectingStatus: "Disconnecting...",
+      disconnectDescription:
+        "This removes the wallet connection from this device. You can connect again later with your phone number.",
+      disconnectTitle: "Disconnect this wallet?",
       modalTitle: "Connect by phone",
       welcomeSubtitle: "Every member gets a wallet that's ready to use, with help covering fees",
       welcomeTitle: "Enter Oasis Token Arcade"
@@ -237,6 +257,16 @@ const dictionaries = {
     },
     connect: {
       appDescription: "電話番号ログインで、かんたんにトークンを作って送れるサービス",
+      connectedHint: "電話番号ウォレットはすぐ使えます",
+      connectedStatus: "ウォレット接続済み",
+      connectingStatus: "ウォレット状態を確認中...",
+      disconnectButton: "ウォレット接続を解除",
+      disconnectCancel: "このまま使う",
+      disconnectConfirm: "接続を解除",
+      disconnectingStatus: "接続を解除中...",
+      disconnectDescription:
+        "この端末でのウォレット接続を解除します。再度使うには、電話番号で接続し直してください。",
+      disconnectTitle: "ウォレット接続を解除しますか？",
       modalTitle: "電話番号で接続",
       welcomeSubtitle: "すべてのメンバーに、すぐ使えるウォレットと手数料サポートを用意します",
       welcomeTitle: "Oasis Token Arcadeへようこそ"
@@ -336,6 +366,16 @@ const dictionaries = {
     },
     connect: {
       appDescription: "通过手机号登录，轻松创建和发送代币",
+      connectedHint: "你的手机号钱包已经准备好了",
+      connectedStatus: "钱包已连接",
+      connectingStatus: "正在检查钱包状态...",
+      disconnectButton: "断开钱包连接",
+      disconnectCancel: "继续保持连接",
+      disconnectConfirm: "断开连接",
+      disconnectingStatus: "正在断开连接...",
+      disconnectDescription:
+        "这会移除当前设备上的钱包连接。之后仍可用手机号重新连接。",
+      disconnectTitle: "要断开这个钱包吗？",
       modalTitle: "手机号连接",
       welcomeSubtitle: "每位会员都会获得一个开箱即用的钱包，并享受手续费支持",
       welcomeTitle: "进入 Oasis Token Arcade"
