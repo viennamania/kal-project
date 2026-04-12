@@ -6,6 +6,8 @@ import { toPublicCampaign, toPublicRewardLog, toPublicToken, toPublicTransferLog
 
 export const runtime = "nodejs";
 
+const publicCampaignTypes = ["airdrop", "attendance", "mission", "referral"] as const;
+
 export default async function TokenDetailPage({
   params
 }: {
@@ -23,7 +25,7 @@ export default async function TokenDetailPage({
 
   const owner = await users.findOne({ walletAddress: storedToken.ownerWallet });
   const relatedCampaigns = await campaigns
-    .find({ tokenAddress })
+    .find({ tokenAddress, type: { $in: [...publicCampaignTypes] } })
     .sort({ createdAt: -1 })
     .limit(8)
     .toArray();

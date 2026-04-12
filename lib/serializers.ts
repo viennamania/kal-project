@@ -45,6 +45,8 @@ export function toPublicToken(token: TokenDocument, owner?: UserDocument | null)
 }
 
 export function toPublicCampaign(campaign: CampaignDocument): PublicCampaign {
+  const updatedAt = campaign.updatedAt ?? campaign.createdAt;
+
   return {
     id: campaign._id?.toString() ?? `${campaign.tokenAddress}:${campaign.title}`,
     tokenAddress: campaign.tokenAddress,
@@ -58,7 +60,7 @@ export function toPublicCampaign(campaign: CampaignDocument): PublicCampaign {
     endsAt: campaign.endsAt?.toISOString() ?? null,
     status: campaign.status,
     createdAt: campaign.createdAt.toISOString(),
-    updatedAt: campaign.updatedAt.toISOString()
+    updatedAt: updatedAt.toISOString()
   };
 }
 

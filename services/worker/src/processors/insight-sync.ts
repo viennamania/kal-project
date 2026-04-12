@@ -14,10 +14,12 @@ export async function processInsightSync(payload: InsightSyncJob) {
       $set: {
         chainId: payload.chainId,
         lastSyncedAt: new Date(),
-        source: "thirdweb-insight"
+        source: "thirdweb-insight",
+        updatedAt: new Date()
       },
       $setOnInsert: {
         createdAt: new Date(),
+        description: "System analytics sync record",
         ownerWallet: "system",
         rewardAmount: "0",
         rules: {},

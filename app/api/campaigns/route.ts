@@ -6,6 +6,8 @@ import { toPublicCampaign } from "@/lib/serializers";
 
 export const runtime = "nodejs";
 
+const publicCampaignTypes = ["airdrop", "attendance", "mission", "referral"] as const;
+
 const campaignSchema = z.object({
   description: z.string().trim().max(240).optional().nullable(),
   endsAt: z.string().datetime().optional().nullable(),
@@ -26,6 +28,7 @@ export async function GET(request: Request) {
   const status = searchParams.get("status")?.trim();
 
   const query: Record<string, unknown> = {};
+  query.type = { $in: [...publicCampaignTypes] };
 
   if (ownerWallet) {
     query.ownerWallet = ownerWallet;
