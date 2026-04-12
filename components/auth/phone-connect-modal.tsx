@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { ArrowLeft, Loader2, ShieldAlert, X } from "lucide-react";
 import { useConnect } from "thirdweb/react";
 import { preAuthenticate } from "thirdweb/wallets/in-app";
@@ -53,6 +54,7 @@ export function PhoneConnectModal({
   const [countdown, setCountdown] = useState(0);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSendingCode, setIsSendingCode] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const [step, setStep] = useState<ConnectStep>("phone");
   const [subscriberPhoneNumber, setSubscriberPhoneNumber] = useState("");
   const [verificationCode, setVerificationCode] = useState("");
@@ -96,6 +98,10 @@ export function PhoneConnectModal({
 
     return null;
   }
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   useEffect(() => {
     if (!open) {
@@ -192,11 +198,11 @@ export function PhoneConnectModal({
     }
   }
 
-  if (!open) {
+  if (!open || !isMounted) {
     return null;
   }
 
-  return (
+  return createPortal(
     <div
       aria-modal="true"
       className="fixed inset-0 z-[95] flex overflow-hidden bg-[#1E2451]/45 backdrop-blur-sm sm:items-center sm:justify-center sm:p-4"
@@ -408,6 +414,7 @@ export function PhoneConnectModal({
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

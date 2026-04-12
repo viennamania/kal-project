@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -52,7 +53,7 @@ export function ConfirmDialog({
     return null;
   }
 
-  return (
+  return createPortal(
     <div
       aria-modal="true"
       className="fixed inset-0 z-[90] flex items-end justify-center bg-[#1E2451]/35 p-4 backdrop-blur-sm sm:items-center"
@@ -98,6 +99,7 @@ export function ConfirmDialog({
           </Button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
