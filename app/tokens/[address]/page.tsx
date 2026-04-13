@@ -2,7 +2,14 @@ import { notFound } from "next/navigation";
 
 import { TokenDetailScreen } from "@/components/token/token-detail-screen";
 import { getCollections } from "@/lib/mongodb";
-import { toPublicCampaign, toPublicRewardLog, toPublicToken, toPublicTransferLog } from "@/lib/serializers";
+import {
+  toPublicCampaign,
+  toPublicInsightTransferLog,
+  toPublicRewardLog,
+  toPublicToken,
+  toPublicTransferLog
+} from "@/lib/serializers";
+import type { PublicTransferLog } from "@/lib/types";
 
 export const runtime = "nodejs";
 
@@ -16,7 +23,7 @@ export default async function TokenDetailPage({
   };
 }) {
   const tokenAddress = params.address;
-  const { campaigns, rewardLogs, tokens, transferLogs, users } = await getCollections();
+  const { campaigns, insightTransferLogs, rewardLogs, tokens, transferLogs, users } = await getCollections();
   const storedToken = await tokens.findOne({ contractAddress: tokenAddress });
 
   if (!storedToken) {
@@ -39,13 +46,40 @@ export default async function TokenDetailPage({
     .sort({ createdAt: -1 })
     .limit(8)
     .toArray();
+  const relatedInsightTransferLogs = await insightTransferLogs
+    .find({ tokenAddress })
+    .sort({ createdAt: -1 })
+    .limit(20)
+    .toArray();
+  const mergedTransferLogs = [...relatedTransferLogs.map(toPublicTransferLog), ...relatedInsightTransferLogs.map(toPublicInsightTransferLog)]
+    .sort((left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime())
+    .reduce<PublicTransferLog[]>((logs, entry) => {
+      const dedupeKey = [entry.txHash, entry.fromWallet.toLowerCase(), entry.toWallet.toLowerCase(), entry.amount].join(":");
+
+      if (logs.some((existing) => {
+        const existingKey = [
+          existing.txHash,
+          existing.fromWallet.toLowerCase(),
+          existing.toWallet.toLowerCase(),
+          existing.amount
+        ].join(":");
+
+        return existingKey === dedupeKey;
+      })) {
+        return logs;
+      }
+
+      logs.push(entry);
+      return logs;
+    }, [])
+    .slice(0, 8);
 
   return (
     <TokenDetailScreen
       campaigns={relatedCampaigns.map(toPublicCampaign)}
       rewardLogs={relatedRewardLogs.map(toPublicRewardLog)}
       token={toPublicToken(storedToken, owner)}
-      transferLogs={relatedTransferLogs.map(toPublicTransferLog)}
+      transferLogs={mergedTransferLogs}
     />
   );
 }

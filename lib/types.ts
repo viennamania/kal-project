@@ -21,6 +21,7 @@ export interface TokenDocument {
   buyEnabled?: boolean;
   chainId: number;
   contractAddress: string;
+  decimals?: number;
   deployTxHash?: string | null;
   deployedAt: Date;
   explorerUrl: string;
@@ -76,6 +77,22 @@ export interface TransferLogDocument {
   createdAt: Date;
 }
 
+export interface InsightTransferLogDocument {
+  _id?: ObjectId;
+  tokenAddress: string;
+  fromWallet: string;
+  toWallet: string;
+  amount: string;
+  rawAmount: string;
+  txHash: string;
+  blockNumber: string;
+  logIndex: string;
+  transferType: string;
+  source: "insight";
+  createdAt: Date;
+  syncedAt: Date;
+}
+
 export interface GasLogDocument {
   _id?: ObjectId;
   tokenAddress?: string | null;
@@ -113,6 +130,7 @@ export interface PublicToken {
   buyEnabled?: boolean;
   chainId: number;
   contractAddress: string;
+  decimals?: number;
   deployTxHash?: string | null;
   deployedAt: string;
   explorerUrl: string;
@@ -163,7 +181,12 @@ export interface PublicTransferLog {
   fromWallet: string;
   toWallet: string;
   amount: string;
+  rawAmount?: string | null;
   txHash: string;
+  blockNumber?: string | null;
+  logIndex?: string | null;
+  transferType?: string | null;
+  source: "app" | "insight";
   createdAt: string;
 }
 

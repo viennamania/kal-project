@@ -49,6 +49,10 @@ const copyByLocale = {
     statsCampaigns: "캠페인",
     statsJobs: "작업",
     statsQueued: "대기 보상",
+    syncButton: "트랜잭션 동기화",
+    syncError: "트랜잭션 동기화 작업을 넣지 못했습니다.",
+    syncHint: "thirdweb Insight에서 이 토큰의 최근 온체인 전송을 다시 가져옵니다.",
+    syncSuccess: "트랜잭션 동기화 작업을 대기열에 넣었습니다.",
     statusDraft: "준비중",
     statusEnded: "종료",
     statusLive: "진행중",
@@ -81,6 +85,10 @@ const copyByLocale = {
     statsCampaigns: "Campaigns",
     statsJobs: "Jobs",
     statsQueued: "Queued rewards",
+    syncButton: "Sync transfers",
+    syncError: "Failed to queue the transfer sync job.",
+    syncHint: "Refresh recent on-chain transfers for this token from thirdweb Insight.",
+    syncSuccess: "Transfer sync job queued.",
     statusDraft: "Draft",
     statusEnded: "Ended",
     statusLive: "Live",
@@ -113,6 +121,10 @@ const copyByLocale = {
     statsCampaigns: "キャンペーン",
     statsJobs: "作業",
     statsQueued: "待機中報酬",
+    syncButton: "取引を同期",
+    syncError: "取引同期ジョブを追加できませんでした。",
+    syncHint: "thirdweb Insight からこのトークンの最近のオンチェーン送信履歴を再取得します。",
+    syncSuccess: "取引同期ジョブをキューに追加しました。",
     statusDraft: "準備中",
     statusEnded: "終了",
     statusLive: "進行中",
@@ -144,6 +156,10 @@ const copyByLocale = {
     statsCampaigns: "活动",
     statsJobs: "任务",
     statsQueued: "排队奖励",
+    syncButton: "同步转账",
+    syncError: "无法加入转账同步任务。",
+    syncHint: "从 thirdweb Insight 重新拉取这个代币最近的链上转账记录。",
+    syncSuccess: "转账同步任务已加入队列。",
     statusDraft: "准备中",
     statusEnded: "已结束",
     statusLive: "进行中",
@@ -165,6 +181,7 @@ export function ManageScreen({ campaigns, jobLogs, rewardLogs, token }: ManageSc
   const [rewardState] = useState(rewardLogs);
   const [campaignMessage, setCampaignMessage] = useState<string | null>(null);
   const [queueMessage, setQueueMessage] = useState<string | null>(null);
+  const [syncMessage, setSyncMessage] = useState<string | null>(null);
   const [campaignForm, setCampaignForm] = useState({
     description: "",
     endsAt: "",
@@ -176,6 +193,7 @@ export function ManageScreen({ campaigns, jobLogs, rewardLogs, token }: ManageSc
   const [airdropInput, setAirdropInput] = useState("");
   const [isSavingCampaign, setIsSavingCampaign] = useState(false);
   const [isQueueing, setIsQueueing] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
 
   const summary = useMemo(
     () => ({
@@ -306,6 +324,57 @@ export function ManageScreen({ campaigns, jobLogs, rewardLogs, token }: ManageSc
       setQueueMessage(error instanceof Error ? error.message : copy.queueError);
     } finally {
       setIsQueueing(false);
+    }
+  }
+
+  async function handleSyncTransfers() {
+    if (!isOwner) {
+      return;
+    }
+
+    setIsSyncing(true);
+    setSyncMessage(null);
+
+    try {
+      const response = await fetch("/api/ops/insight-sync", {
+        body: JSON.stringify({
+          chainId: token.chainId,
+          tokenAddress: token.contractAddress
+        }),
+        headers: {
+          "Content-Type": "application/json"
+        },
+        method: "POST"
+      });
+
+      if (!response.ok) {
+        throw new Error(copy.syncError);
+      }
+
+      const data = (await response.json()) as { jobId: string | number; status: string };
+      const now = new Date().toISOString();
+
+      setJobState((current) => [
+        {
+          createdAt: now,
+          errorMessage: null,
+          id: String(data.jobId),
+          jobId: String(data.jobId),
+          jobName: "insight.sync",
+          payload: {
+            tokenAddress: token.contractAddress
+          },
+          result: null,
+          status: "queued",
+          updatedAt: now
+        },
+        ...current
+      ]);
+      setSyncMessage(copy.syncSuccess);
+    } catch (error) {
+      setSyncMessage(error instanceof Error ? error.message : copy.syncError);
+    } finally {
+      setIsSyncing(false);
     }
   }
 
@@ -522,10 +591,26 @@ export function ManageScreen({ campaigns, jobLogs, rewardLogs, token }: ManageSc
 
         <div className="space-y-6">
           <Panel className="p-5 sm:p-6">
-            <div className="mb-4 flex items-center gap-3">
-              <Clock3 className="h-6 w-6 text-candy" />
-              <h3 className="font-display text-3xl text-ink">{copy.jobsTitle}</h3>
+            <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-3">
+                <Clock3 className="h-6 w-6 text-candy" />
+                <h3 className="font-display text-3xl text-ink">{copy.jobsTitle}</h3>
+              </div>
+              <Button
+                disabled={!isOwner || isSyncing}
+                onClick={handleSyncTransfers}
+                type="button"
+                variant="secondary"
+              >
+                {copy.syncButton}
+              </Button>
             </div>
+            <p className="mb-4 text-sm text-ink/55">{copy.syncHint}</p>
+            {syncMessage ? (
+              <div className="mb-4 rounded-3xl border border-sky/25 bg-sky/10 px-4 py-3 text-sm text-ink">
+                {syncMessage}
+              </div>
+            ) : null}
             <div className="space-y-3">
               {jobState.length === 0 ? (
                 <div className="rounded-[24px] border border-dashed border-white/80 bg-white/55 p-4 text-sm text-ink/60">

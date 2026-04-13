@@ -10,6 +10,7 @@ const tokenSchema = z.object({
   buyEnabled: z.boolean().optional(),
   chainId: z.number().int().default(56),
   contractAddress: z.string().trim().min(10),
+  decimals: z.number().int().min(0).max(18).default(18),
   description: z.string().trim().max(240).optional().nullable(),
   deployTxHash: z.string().trim().optional().nullable(),
   imageUrl: z.string().url().optional().nullable(),
@@ -56,6 +57,7 @@ export async function POST(request: Request) {
       $set: {
         chainId: token.chainId,
         contractAddress: token.contractAddress,
+        decimals: token.decimals,
         deployTxHash: token.deployTxHash ?? null,
         explorerUrl: `https://bscscan.com/token/${token.contractAddress}`,
         imageUrl: token.imageUrl ?? null,

@@ -40,6 +40,8 @@ const copyByLocale: Record<
   {
     activityEmpty: string;
     activityEyebrow: string;
+    activityInsightLabel: string;
+    activityLocalLabel: string;
     activityTitle: string;
     backToWallet: string;
     buyConnectedDescription: string;
@@ -68,6 +70,8 @@ const copyByLocale: Record<
   ko: {
     activityEmpty: "아직 표시할 최근 활동이 없습니다.",
     activityEyebrow: "최근 활동",
+    activityInsightLabel: "온체인 동기화",
+    activityLocalLabel: "앱 기록",
     activityTitle: "전송과 보상 기록",
     backToWallet: "지갑 서비스로",
     buyConnectedDescription: "카드 결제나 보유 자산으로 이 토큰을 바로 받을 수 있습니다.",
@@ -96,6 +100,8 @@ const copyByLocale: Record<
   en: {
     activityEmpty: "No recent activity is available yet.",
     activityEyebrow: "Recent activity",
+    activityInsightLabel: "On-chain sync",
+    activityLocalLabel: "App log",
     activityTitle: "Transfer and reward history",
     backToWallet: "Back to wallet",
     buyConnectedDescription: "Buy this token directly with a card or supported crypto.",
@@ -124,6 +130,8 @@ const copyByLocale: Record<
   ja: {
     activityEmpty: "まだ表示できる最近の活動はありません。",
     activityEyebrow: "最近の活動",
+    activityInsightLabel: "オンチェーン同期",
+    activityLocalLabel: "アプリ記録",
     activityTitle: "送信と報酬の履歴",
     backToWallet: "ウォレットサービスへ",
     buyConnectedDescription: "カード決済や保有資産から、このトークンをすぐ受け取れます。",
@@ -152,6 +160,8 @@ const copyByLocale: Record<
   "zh-CN": {
     activityEmpty: "暂时还没有可显示的近期活动。",
     activityEyebrow: "近期活动",
+    activityInsightLabel: "链上同步",
+    activityLocalLabel: "应用记录",
     activityTitle: "转账与奖励记录",
     backToWallet: "前往钱包服务",
     buyConnectedDescription: "你可以直接用银行卡或现有加密资产购买这个代币。",
@@ -193,13 +203,14 @@ export function TokenDetailScreen({
   const canBuyWithWidget = token.buyEnabled === true;
 
   const recentActivity = useMemo(() => {
-    const transferItems = transferLogs.map((log) => ({
-      id: `transfer-${log.id}`,
-      type: "transfer" as const,
-      createdAt: log.createdAt,
-      title: `${formatAmount(log.amount, intlLocale)} ${token.symbol}`,
-      detail: `${shortenAddress(log.fromWallet, 8, 4)} → ${shortenAddress(log.toWallet, 8, 4)}`
-    }));
+      const transferItems = transferLogs.map((log) => ({
+        id: `transfer-${log.id}`,
+        type: "transfer" as const,
+        createdAt: log.createdAt,
+        title: `${formatAmount(log.amount, intlLocale)} ${token.symbol}`,
+        detail: `${shortenAddress(log.fromWallet, 8, 4)} → ${shortenAddress(log.toWallet, 8, 4)}`,
+        sourceLabel: log.source === "insight" ? copy.activityInsightLabel : copy.activityLocalLabel
+      }));
 
     const rewardItems = rewardLogs.map((log) => ({
       id: `reward-${log.id}`,
@@ -219,7 +230,7 @@ export function TokenDetailScreen({
     return [...transferItems, ...rewardItems]
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
       .slice(0, 8);
-  }, [intlLocale, rewardLogs, token.symbol, transferLogs]);
+  }, [copy.activityInsightLabel, copy.activityLocalLabel, intlLocale, rewardLogs, token.symbol, transferLogs]);
 
   return (
     <main className="mx-auto max-w-7xl px-4 pb-10 pt-4 sm:px-6 sm:pt-6 lg:px-8">
@@ -470,6 +481,7 @@ export function TokenDetailScreen({
                       <p className="text-sm font-semibold text-ink">{entry.title}</p>
                       <p className="mt-1 break-words text-sm text-ink/60">{entry.detail}</p>
                       <p className="mt-2 text-xs text-ink/45">
+                        {entry.type === "transfer" ? `${entry.sourceLabel} · ` : ""}
                         {formatDate(entry.createdAt, intlLocale)}
                       </p>
                     </div>

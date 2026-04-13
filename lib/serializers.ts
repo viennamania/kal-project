@@ -1,5 +1,6 @@
 import type {
   CampaignDocument,
+  InsightTransferLogDocument,
   JobLogDocument,
   PublicCampaign,
   PublicJobLog,
@@ -31,6 +32,7 @@ export function toPublicToken(token: TokenDocument, owner?: UserDocument | null)
     buyEnabled: token.buyEnabled ?? false,
     chainId: token.chainId,
     contractAddress: token.contractAddress,
+    decimals: token.decimals ?? 18,
     deployTxHash: token.deployTxHash ?? null,
     deployedAt: token.deployedAt.toISOString(),
     explorerUrl: token.explorerUrl,
@@ -89,7 +91,31 @@ export function toPublicTransferLog(transferLog: TransferLogDocument): PublicTra
     fromWallet: transferLog.fromWallet,
     toWallet: transferLog.toWallet,
     amount: transferLog.amount,
+    rawAmount: transferLog.amount,
     txHash: transferLog.txHash,
+    blockNumber: null,
+    logIndex: null,
+    transferType: null,
+    source: "app",
+    createdAt: transferLog.createdAt.toISOString()
+  };
+}
+
+export function toPublicInsightTransferLog(transferLog: InsightTransferLogDocument): PublicTransferLog {
+  return {
+    id:
+      transferLog._id?.toString() ??
+      `${transferLog.tokenAddress}:${transferLog.txHash}:${transferLog.logIndex}`,
+    tokenAddress: transferLog.tokenAddress,
+    fromWallet: transferLog.fromWallet,
+    toWallet: transferLog.toWallet,
+    amount: transferLog.amount,
+    rawAmount: transferLog.rawAmount,
+    txHash: transferLog.txHash,
+    blockNumber: transferLog.blockNumber,
+    logIndex: transferLog.logIndex,
+    transferType: transferLog.transferType,
+    source: "insight",
     createdAt: transferLog.createdAt.toISOString()
   };
 }

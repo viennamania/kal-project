@@ -6,6 +6,7 @@ import { env } from "@/lib/env";
 import type {
   CampaignDocument,
   GasLogDocument,
+  InsightTransferLogDocument,
   JobLogDocument,
   RewardLogDocument,
   TokenDocument,
@@ -58,6 +59,10 @@ async function ensureIndexes() {
         db.collection<TransferLogDocument>("transfer_logs").createIndex({ tokenAddress: 1, createdAt: -1 }),
         db.collection<TransferLogDocument>("transfer_logs").createIndex({ fromWallet: 1, createdAt: -1 }),
         db.collection<TransferLogDocument>("transfer_logs").createIndex({ toWallet: 1, createdAt: -1 }),
+        db
+          .collection<InsightTransferLogDocument>("insight_transfer_logs")
+          .createIndex({ tokenAddress: 1, txHash: 1, logIndex: 1 }, { unique: true }),
+        db.collection<InsightTransferLogDocument>("insight_transfer_logs").createIndex({ tokenAddress: 1, createdAt: -1 }),
         db.collection<JobLogDocument>("job_logs").createIndex({ jobId: 1 }, { unique: true }),
         db.collection<JobLogDocument>("job_logs").createIndex({ jobName: 1, createdAt: -1 }),
         db.collection<GasLogDocument>("gas_logs").createIndex({ walletAddress: 1, createdAt: -1 })
@@ -75,6 +80,7 @@ export async function getCollections() {
   return {
     campaigns: db.collection<CampaignDocument>("campaigns"),
     gasLogs: db.collection<GasLogDocument>("gas_logs"),
+    insightTransferLogs: db.collection<InsightTransferLogDocument>("insight_transfer_logs"),
     jobLogs: db.collection<JobLogDocument>("job_logs"),
     rewardLogs: db.collection<RewardLogDocument>("reward_logs"),
     tokens: db.collection<TokenDocument>("tokens"),
