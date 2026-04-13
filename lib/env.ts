@@ -3,6 +3,7 @@ import "server-only";
 import { z } from "zod";
 
 const envSchema = z.object({
+  APP_SESSION_SECRET: z.string().min(32).optional(),
   BLOB_READ_WRITE_TOKEN: z.string().min(1),
   MONGODB_DB_NAME: z.string().min(1),
   MONGODB_URI: z.string().min(1),
@@ -14,6 +15,7 @@ const envSchema = z.object({
 });
 
 export const env = envSchema.parse({
+  APP_SESSION_SECRET: process.env.APP_SESSION_SECRET,
   BLOB_READ_WRITE_TOKEN: process.env.BLOB_READ_WRITE_TOKEN,
   MONGODB_DB_NAME: process.env.MONGODB_DB_NAME,
   MONGODB_URI: process.env.MONGODB_URI,

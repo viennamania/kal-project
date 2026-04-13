@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { ManageScreen } from "@/components/studio/manage-screen";
 import { getCollections } from "@/lib/mongodb";
 import { toPublicCampaign, toPublicJobLog, toPublicRewardLog, toPublicToken } from "@/lib/serializers";
+import { escapeRegex } from "@/lib/utils";
 
 export const runtime = "nodejs";
 
@@ -21,7 +22,12 @@ export default async function ManagePage({
     notFound();
   }
 
-  const owner = await users.findOne({ walletAddress: storedToken.ownerWallet });
+  const owner = await users.findOne({
+    walletAddress: {
+      $options: "i",
+      $regex: `^${escapeRegex(storedToken.ownerWallet)}$`
+    }
+  });
   const relatedCampaigns = await campaigns
     .find({ tokenAddress, type: { $in: ["airdrop", "attendance", "mission", "referral"] } })
     .sort({ createdAt: -1 })

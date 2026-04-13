@@ -10,6 +10,7 @@ import {
   toPublicTransferLog
 } from "@/lib/serializers";
 import type { PublicTransferLog } from "@/lib/types";
+import { escapeRegex } from "@/lib/utils";
 
 export const runtime = "nodejs";
 
@@ -30,7 +31,12 @@ export default async function TokenDetailPage({
     notFound();
   }
 
-  const owner = await users.findOne({ walletAddress: storedToken.ownerWallet });
+  const owner = await users.findOne({
+    walletAddress: {
+      $options: "i",
+      $regex: `^${escapeRegex(storedToken.ownerWallet)}$`
+    }
+  });
   const relatedCampaigns = await campaigns
     .find({ tokenAddress, type: { $in: [...publicCampaignTypes] } })
     .sort({ createdAt: -1 })

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+import { authErrorResponse, requireTokenOwner } from "@/lib/auth-session";
 import { enqueueOpsJob } from "@/lib/ops-client";
 import { getCollections } from "@/lib/mongodb";
 
@@ -21,8 +22,20 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid reward payload." }, { status: 400 });
   }
 
+  let jobPayload: z.infer<typeof rewardSchema>;
+
   try {
-    const result = await enqueueOpsJob("/jobs/rewards", payload.data);
+    const { token } = await requireTokenOwner(payload.data.tokenAddress);
+    jobPayload = {
+      ...payload.data,
+      tokenAddress: token.contractAddress
+    };
+  } catch (error) {
+    return authErrorResponse(error);
+  }
+
+  try {
+    const result = await enqueueOpsJob("/jobs/rewards", jobPayload);
     const { jobLogs } = await getCollections();
     const now = new Date();
 
@@ -31,7 +44,7 @@ export async function POST(request: Request) {
       {
         $set: {
           jobName: "reward.issue",
-          payload: payload.data,
+          payload: jobPayload,
           status: "queued",
           updatedAt: now
         },

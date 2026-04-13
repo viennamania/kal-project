@@ -63,6 +63,9 @@ export function WalletConnectButton() {
 
     try {
       await disconnect(activeWallet);
+      await fetch("/api/auth/logout", {
+        method: "POST"
+      }).catch(() => undefined);
       setIsConfirmOpen(false);
     } catch (error) {
       setDisconnectError(

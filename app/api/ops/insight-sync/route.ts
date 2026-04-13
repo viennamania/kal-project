@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+import { authErrorResponse, requireTokenOwner } from "@/lib/auth-session";
 import { enqueueOpsJob } from "@/lib/ops-client";
 import { getCollections } from "@/lib/mongodb";
 
@@ -18,8 +19,20 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid insight sync payload." }, { status: 400 });
   }
 
+  let jobPayload: z.infer<typeof insightSchema>;
+
   try {
-    const result = await enqueueOpsJob("/jobs/insight-sync", payload.data);
+    const { token } = await requireTokenOwner(payload.data.tokenAddress);
+    jobPayload = {
+      chainId: payload.data.chainId,
+      tokenAddress: token.contractAddress
+    };
+  } catch (error) {
+    return authErrorResponse(error);
+  }
+
+  try {
+    const result = await enqueueOpsJob("/jobs/insight-sync", jobPayload);
     const { jobLogs } = await getCollections();
     const now = new Date();
 
@@ -28,7 +41,7 @@ export async function POST(request: Request) {
       {
         $set: {
           jobName: "insight.sync",
-          payload: payload.data,
+          payload: jobPayload,
           status: "queued",
           updatedAt: now
         },

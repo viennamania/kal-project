@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+import { authErrorResponse, requireTokenOwner } from "@/lib/auth-session";
 import { verifyTokenLiquidityPair } from "@/lib/liquidity";
 import { getCollections } from "@/lib/mongodb";
 import { toPublicToken } from "@/lib/serializers";
+import { escapeRegex } from "@/lib/utils";
 
 export const runtime = "nodejs";
 
@@ -30,14 +32,16 @@ export async function POST(
     return NextResponse.json({ error: "Invalid liquidity payload." }, { status: 400 });
   }
 
-  const { tokens, users } = await getCollections();
-  const storedToken = await tokens.findOne({ contractAddress: params.address });
+  let storedToken: Awaited<ReturnType<typeof requireTokenOwner>>["token"];
 
-  if (!storedToken) {
-    return NextResponse.json({ error: "Token not found." }, { status: 404 });
+  try {
+    ({ token: storedToken } = await requireTokenOwner(params.address));
+  } catch (error) {
+    return authErrorResponse(error);
   }
 
   try {
+    const { tokens, users } = await getCollections();
     const verified = await verifyTokenLiquidityPair({
       pairAddress: payload.data.pairAddress,
       tokenAddress: storedToken.contractAddress
@@ -60,7 +64,12 @@ export async function POST(
     );
 
     const updatedToken = await tokens.findOne({ contractAddress: storedToken.contractAddress });
-    const owner = await users.findOne({ walletAddress: storedToken.ownerWallet });
+    const owner = await users.findOne({
+      walletAddress: {
+        $options: "i",
+        $regex: `^${escapeRegex(storedToken.ownerWallet)}$`
+      }
+    });
 
     if (!updatedToken) {
       return NextResponse.json({ error: "Failed to update liquidity state." }, { status: 500 });

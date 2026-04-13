@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+import { authErrorResponse, requireAuthenticatedWallet, SessionAuthError } from "@/lib/auth-session";
 import { getCollections } from "@/lib/mongodb";
 import { toPublicTransferLog } from "@/lib/serializers";
 
@@ -50,33 +51,43 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid transfer payload." }, { status: 400 });
   }
 
-  const { transferLogs } = await getCollections();
-  const transfer = payload.data;
-  const now = new Date();
+  try {
+    const session = requireAuthenticatedWallet();
+    const transfer = payload.data;
 
-  await transferLogs.updateOne(
-    { txHash: transfer.txHash },
-    {
-      $set: {
-        amount: transfer.amount,
-        fromWallet: transfer.fromWallet,
-        toWallet: transfer.toWallet,
-        tokenAddress: transfer.tokenAddress
+    if (transfer.fromWallet.toLowerCase() !== session.address) {
+      throw new SessionAuthError("Session wallet does not match the transfer sender.", 403);
+    }
+
+    const { transferLogs } = await getCollections();
+    const now = new Date();
+
+    await transferLogs.updateOne(
+      { txHash: transfer.txHash },
+      {
+        $set: {
+          amount: transfer.amount,
+          fromWallet: session.address,
+          toWallet: transfer.toWallet,
+          tokenAddress: transfer.tokenAddress
+        },
+        $setOnInsert: {
+          createdAt: now
+        }
       },
-      $setOnInsert: {
-        createdAt: now
-      }
-    },
-    { upsert: true }
-  );
+      { upsert: true }
+    );
 
-  const stored = await transferLogs.findOne({ txHash: transfer.txHash });
+    const stored = await transferLogs.findOne({ txHash: transfer.txHash });
 
-  if (!stored) {
-    return NextResponse.json({ error: "Failed to save transfer log." }, { status: 500 });
+    if (!stored) {
+      return NextResponse.json({ error: "Failed to save transfer log." }, { status: 500 });
+    }
+
+    return NextResponse.json({
+      transferLog: toPublicTransferLog(stored)
+    });
+  } catch (error) {
+    return authErrorResponse(error);
   }
-
-  return NextResponse.json({
-    transferLog: toPublicTransferLog(stored)
-  });
 }

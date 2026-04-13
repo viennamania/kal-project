@@ -1,8 +1,14 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+import {
+  authErrorResponse,
+  requireAuthenticatedWallet,
+  SessionAuthError
+} from "@/lib/auth-session";
 import { getCollections } from "@/lib/mongodb";
 import { toPublicToken } from "@/lib/serializers";
+import { escapeRegex } from "@/lib/utils";
 
 export const runtime = "nodejs";
 
@@ -26,7 +32,14 @@ export async function GET(request: Request) {
   const owner = searchParams.get("owner")?.trim();
 
   const { tokens, users } = await getCollections();
-  const query = owner ? { ownerWallet: owner } : {};
+  const query = owner
+    ? {
+        ownerWallet: {
+          $options: "i",
+          $regex: `^${escapeRegex(owner)}$`
+        }
+      }
+    : {};
   const storedTokens = await tokens.find(query).sort({ deployedAt: -1 }).limit(100).toArray();
 
   const ownerWallets = [...new Set(storedTokens.map((token) => token.ownerWallet))];
@@ -47,43 +60,58 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid token payload." }, { status: 400 });
   }
 
-  const { tokens, users } = await getCollections();
-  const now = new Date();
-  const token = payload.data;
+  try {
+    const session = requireAuthenticatedWallet();
+    const { tokens, users } = await getCollections();
+    const now = new Date();
+    const token = payload.data;
+    const existing = await tokens.findOne({ contractAddress: token.contractAddress });
 
-  await tokens.updateOne(
-    { contractAddress: token.contractAddress },
-    {
-      $set: {
-        chainId: token.chainId,
-        contractAddress: token.contractAddress,
-        decimals: token.decimals,
-        deployTxHash: token.deployTxHash ?? null,
-        explorerUrl: `https://bscscan.com/token/${token.contractAddress}`,
-        imageUrl: token.imageUrl ?? null,
-        mintTxHash: token.mintTxHash ?? null,
-        name: token.name,
-        ownerWallet: token.ownerWallet,
-        description: token.description ?? null,
-        buyEnabled: token.buyEnabled ?? false,
-        supply: token.supply,
-        symbol: token.symbol
+    if (existing && existing.ownerWallet.toLowerCase() !== session.address) {
+      throw new SessionAuthError("Only the token owner can update this token.", 403);
+    }
+
+    await tokens.updateOne(
+      { contractAddress: token.contractAddress },
+      {
+        $set: {
+          chainId: token.chainId,
+          contractAddress: token.contractAddress,
+          decimals: token.decimals,
+          deployTxHash: token.deployTxHash ?? null,
+          explorerUrl: `https://bscscan.com/token/${token.contractAddress}`,
+          imageUrl: token.imageUrl ?? null,
+          mintTxHash: token.mintTxHash ?? null,
+          name: token.name,
+          ownerWallet: session.address,
+          description: token.description ?? null,
+          buyEnabled: token.buyEnabled ?? false,
+          supply: token.supply,
+          symbol: token.symbol
+        },
+        $setOnInsert: {
+          deployedAt: now
+        }
       },
-      $setOnInsert: {
-        deployedAt: now
+      { upsert: true }
+    );
+
+    const stored = await tokens.findOne({ contractAddress: token.contractAddress });
+    const owner = await users.findOne({
+      walletAddress: {
+        $options: "i",
+        $regex: `^${escapeRegex(session.address)}$`
       }
-    },
-    { upsert: true }
-  );
+    });
 
-  const stored = await tokens.findOne({ contractAddress: token.contractAddress });
-  const owner = await users.findOne({ walletAddress: token.ownerWallet });
+    if (!stored) {
+      return NextResponse.json({ error: "Failed to save token." }, { status: 500 });
+    }
 
-  if (!stored) {
-    return NextResponse.json({ error: "Failed to save token." }, { status: 500 });
+    return NextResponse.json({
+      token: toPublicToken(stored, owner)
+    });
+  } catch (error) {
+    return authErrorResponse(error);
   }
-
-  return NextResponse.json({
-    token: toPublicToken(stored, owner)
-  });
 }

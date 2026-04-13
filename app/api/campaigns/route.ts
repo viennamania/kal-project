@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+import { authErrorResponse, requireTokenOwner } from "@/lib/auth-session";
 import { getCollections } from "@/lib/mongodb";
 import { toPublicCampaign } from "@/lib/serializers";
+import { escapeRegex } from "@/lib/utils";
 
 export const runtime = "nodejs";
 
@@ -31,7 +33,10 @@ export async function GET(request: Request) {
   query.type = { $in: [...publicCampaignTypes] };
 
   if (ownerWallet) {
-    query.ownerWallet = ownerWallet;
+    query.ownerWallet = {
+      $options: "i",
+      $regex: `^${escapeRegex(ownerWallet)}$`
+    };
   }
 
   if (tokenAddress) {
@@ -57,6 +62,17 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid campaign payload." }, { status: 400 });
   }
 
+  let tokenAddress: string;
+  let ownerWallet: string;
+
+  try {
+    const { token } = await requireTokenOwner(payload.data.tokenAddress);
+    tokenAddress = token.contractAddress;
+    ownerWallet = token.ownerWallet;
+  } catch (error) {
+    return authErrorResponse(error);
+  }
+
   const { campaigns } = await getCollections();
   const now = new Date();
   const campaign = payload.data;
@@ -65,13 +81,13 @@ export async function POST(request: Request) {
     createdAt: now,
     description: campaign.description ?? null,
     endsAt: campaign.endsAt ? new Date(campaign.endsAt) : null,
-    ownerWallet: campaign.ownerWallet,
+    ownerWallet,
     rewardAmount: campaign.rewardAmount,
     rules: campaign.rules ?? {},
     startsAt: new Date(campaign.startsAt),
     status: campaign.status,
     title: campaign.title,
-    tokenAddress: campaign.tokenAddress,
+    tokenAddress,
     type: campaign.type,
     updatedAt: now
   };
