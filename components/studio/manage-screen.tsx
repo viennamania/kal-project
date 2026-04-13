@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { type FormEvent, useMemo, useState } from "react";
 import { useActiveAccount } from "thirdweb/react";
-import { Activity, Clock3, Rocket, ShieldCheck } from "lucide-react";
+import { Activity, Clock3, Coins, ExternalLink, Rocket, ShieldCheck } from "lucide-react";
 
 import { LanguageSwitcher } from "@/components/i18n/language-switcher";
 import { useLocale } from "@/components/providers/locale-provider";
@@ -39,6 +39,22 @@ const copyByLocale = {
     headerEyebrow: "운영 센터",
     headerTitle: "캠페인, 보상, 작업 상태를 한곳에서 관리",
     jobsTitle: "최근 작업",
+    liquidityBuyClosed: "구매 잠김",
+    liquidityBuyOpen: "구매 열림",
+    liquidityButton: "LP 검증하고 구매 열기",
+    liquidityHint:
+      "PancakeSwap에서 만든 pair 주소를 넣으면 온체인 reserve를 확인하고 구매 위젯을 자동으로 엽니다.",
+    liquidityMissing: "아직 등록된 LP가 없습니다.",
+    liquidityPairLabel: "Pair 주소",
+    liquidityQuoteLabel: "상대 토큰",
+    liquidityStatusLabel: "유동성 상태",
+    liquidityStatusPending: "등록됨, 유동성 대기",
+    liquidityStatusVerified: "검증 완료",
+    liquiditySubmitError: "LP 검증에 실패했습니다.",
+    liquiditySubmitSuccessPending: "pair는 확인됐지만 아직 reserve가 없어 구매는 잠겨 있습니다.",
+    liquiditySubmitSuccessVerified: "LP를 확인했고 구매 경로를 열었습니다.",
+    liquidityTitle: "PancakeSwap LP 연결",
+    liquidityTxHashLabel: "LP 트랜잭션 해시",
     manageLocked: "현재 연결된 지갑이 이 토큰의 운영 지갑과 다르면 읽기 전용으로 표시됩니다.",
     queueButton: "에어드롭 대기열 만들기",
     queueError: "에어드롭 대기열 생성에 실패했습니다.",
@@ -74,6 +90,23 @@ const copyByLocale = {
     headerEyebrow: "Manage center",
     headerTitle: "Run campaigns, rewards, and job queues in one place",
     jobsTitle: "Recent jobs",
+    liquidityBuyClosed: "Buy Off",
+    liquidityBuyOpen: "Buy On",
+    liquidityButton: "Verify LP and open buy",
+    liquidityHint:
+      "Paste the PancakeSwap pair address. The app checks on-chain reserves and unlocks the buy widget automatically.",
+    liquidityMissing: "No LP pair has been linked yet.",
+    liquidityPairLabel: "Pair address",
+    liquidityQuoteLabel: "Quote token",
+    liquidityStatusLabel: "Liquidity status",
+    liquidityStatusPending: "Linked, waiting for reserves",
+    liquidityStatusVerified: "Verified",
+    liquiditySubmitError: "Failed to verify the LP pair.",
+    liquiditySubmitSuccessPending:
+      "The pair was found, but reserves are still zero so buying stays disabled.",
+    liquiditySubmitSuccessVerified: "LP verified and the buy route is now enabled.",
+    liquidityTitle: "Link PancakeSwap LP",
+    liquidityTxHashLabel: "LP transaction hash",
     manageLocked:
       "This screen becomes read-only when the connected wallet does not match the token owner wallet.",
     queueButton: "Queue airdrop batch",
@@ -110,6 +143,23 @@ const copyByLocale = {
     headerEyebrow: "運営センター",
     headerTitle: "キャンペーン、報酬、作業状態をまとめて管理",
     jobsTitle: "最近の作業",
+    liquidityBuyClosed: "購入停止",
+    liquidityBuyOpen: "購入開始",
+    liquidityButton: "LPを確認して購入を開く",
+    liquidityHint:
+      "PancakeSwap で作成した pair アドレスを入力すると、オンチェーン reserve を確認して購入ウィジェットを自動で開きます。",
+    liquidityMissing: "まだ登録された LP はありません。",
+    liquidityPairLabel: "Pair アドレス",
+    liquidityQuoteLabel: "相手トークン",
+    liquidityStatusLabel: "流動性ステータス",
+    liquidityStatusPending: "登録済み、流動性待ち",
+    liquidityStatusVerified: "確認済み",
+    liquiditySubmitError: "LP の確認に失敗しました。",
+    liquiditySubmitSuccessPending:
+      "pair は確認できましたが reserve がまだ 0 のため、購入はまだ無効です。",
+    liquiditySubmitSuccessVerified: "LP を確認し、購入ルートを有効にしました。",
+    liquidityTitle: "PancakeSwap LP 連携",
+    liquidityTxHashLabel: "LP トランザクションハッシュ",
     manageLocked:
       "接続中ウォレットがこのトークンの所有ウォレットと異なる場合、この画面は閲覧専用になります。",
     queueButton: "エアドロップ待機を作成",
@@ -146,6 +196,22 @@ const copyByLocale = {
     headerEyebrow: "运营中心",
     headerTitle: "在一个页面管理活动、奖励和任务队列",
     jobsTitle: "最近任务",
+    liquidityBuyClosed: "购买关闭",
+    liquidityBuyOpen: "购买开启",
+    liquidityButton: "验证 LP 并开启购买",
+    liquidityHint:
+      "输入在 PancakeSwap 创建的 pair 地址后，系统会检查链上 reserve，并在通过后自动开启购买组件。",
+    liquidityMissing: "还没有绑定 LP pair。",
+    liquidityPairLabel: "Pair 地址",
+    liquidityQuoteLabel: "报价代币",
+    liquidityStatusLabel: "流动性状态",
+    liquidityStatusPending: "已绑定，等待流动性",
+    liquidityStatusVerified: "已验证",
+    liquiditySubmitError: "LP 验证失败。",
+    liquiditySubmitSuccessPending: "已找到 pair，但 reserve 仍为 0，购买功能保持关闭。",
+    liquiditySubmitSuccessVerified: "LP 已验证，购买路径已开启。",
+    liquidityTitle: "连接 PancakeSwap LP",
+    liquidityTxHashLabel: "LP 交易哈希",
     manageLocked: "当当前连接钱包不是该代币的拥有者钱包时，此页面将以只读方式显示。",
     queueButton: "加入空投队列",
     queueError: "加入空投队列失败。",
@@ -175,11 +241,17 @@ export function ManageScreen({ campaigns, jobLogs, rewardLogs, token }: ManageSc
   const copy = copyByLocale[locale];
   const intlLocale =
     locale === "ko" ? "ko-KR" : locale === "ja" ? "ja-JP" : locale === "zh-CN" ? "zh-CN" : "en-US";
-  const isOwner = account?.address?.toLowerCase() === token.ownerWallet.toLowerCase();
+  const [tokenState, setTokenState] = useState(token);
+  const isOwner = account?.address?.toLowerCase() === tokenState.ownerWallet.toLowerCase();
   const [campaignState, setCampaignState] = useState(campaigns);
   const [jobState, setJobState] = useState(jobLogs);
   const [rewardState] = useState(rewardLogs);
   const [campaignMessage, setCampaignMessage] = useState<string | null>(null);
+  const [liquidityForm, setLiquidityForm] = useState({
+    liquidityTxHash: token.liquidityTxHash ?? "",
+    pairAddress: token.liquidityPairAddress ?? ""
+  });
+  const [liquidityMessage, setLiquidityMessage] = useState<string | null>(null);
   const [queueMessage, setQueueMessage] = useState<string | null>(null);
   const [syncMessage, setSyncMessage] = useState<string | null>(null);
   const [campaignForm, setCampaignForm] = useState({
@@ -192,8 +264,21 @@ export function ManageScreen({ campaigns, jobLogs, rewardLogs, token }: ManageSc
   });
   const [airdropInput, setAirdropInput] = useState("");
   const [isSavingCampaign, setIsSavingCampaign] = useState(false);
+  const [isVerifyingLiquidity, setIsVerifyingLiquidity] = useState(false);
   const [isQueueing, setIsQueueing] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
+
+  const liquidityStatusLabel =
+    tokenState.liquidityStatus === "verified"
+      ? copy.liquidityStatusVerified
+      : tokenState.liquidityStatus === "pending"
+        ? copy.liquidityStatusPending
+        : copy.liquidityMissing;
+  const liquidityQuoteText = tokenState.liquidityQuoteTokenAddress
+    ? tokenState.liquidityQuoteTokenSymbol
+      ? `${tokenState.liquidityQuoteTokenSymbol} · ${shortenAddress(tokenState.liquidityQuoteTokenAddress, 8, 6)}`
+      : shortenAddress(tokenState.liquidityQuoteTokenAddress, 8, 6)
+    : "—";
 
   const summary = useMemo(
     () => ({
@@ -219,12 +304,12 @@ export function ManageScreen({ campaigns, jobLogs, rewardLogs, token }: ManageSc
         body: JSON.stringify({
           description: campaignForm.description || null,
           endsAt: campaignForm.endsAt ? new Date(campaignForm.endsAt).toISOString() : null,
-          ownerWallet: token.ownerWallet,
+          ownerWallet: tokenState.ownerWallet,
           rewardAmount: campaignForm.rewardAmount,
           startsAt: new Date(campaignForm.startsAt || Date.now()).toISOString(),
           status: "draft",
           title: campaignForm.title,
-          tokenAddress: token.contractAddress,
+          tokenAddress: tokenState.contractAddress,
           type: campaignForm.type
         }),
         headers: {
@@ -252,6 +337,53 @@ export function ManageScreen({ campaigns, jobLogs, rewardLogs, token }: ManageSc
       setCampaignMessage(error instanceof Error ? error.message : copy.campaignSubmitError);
     } finally {
       setIsSavingCampaign(false);
+    }
+  }
+
+  async function handleVerifyLiquidity(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (!isOwner) {
+      return;
+    }
+
+    setIsVerifyingLiquidity(true);
+    setLiquidityMessage(null);
+
+    try {
+      const response = await fetch(`/api/tokens/${tokenState.contractAddress}/liquidity`, {
+        body: JSON.stringify({
+          liquidityTxHash: liquidityForm.liquidityTxHash.trim() || null,
+          pairAddress: liquidityForm.pairAddress.trim()
+        }),
+        headers: {
+          "Content-Type": "application/json"
+        },
+        method: "POST"
+      });
+      const data = (await response.json()) as {
+        error?: string;
+        token?: PublicToken;
+      };
+
+      if (!response.ok || !data.token) {
+        throw new Error(data.error || copy.liquiditySubmitError);
+      }
+
+      setTokenState(data.token);
+      setLiquidityForm({
+        liquidityTxHash: data.token.liquidityTxHash ?? "",
+        pairAddress: data.token.liquidityPairAddress ?? liquidityForm.pairAddress
+      });
+      setLiquidityMessage(
+        data.token.liquidityStatus === "verified"
+          ? copy.liquiditySubmitSuccessVerified
+          : copy.liquiditySubmitSuccessPending
+      );
+    } catch (error) {
+      setLiquidityMessage(error instanceof Error ? error.message : copy.liquiditySubmitError);
+    } finally {
+      setIsVerifyingLiquidity(false);
     }
   }
 
@@ -285,9 +417,9 @@ export function ManageScreen({ campaigns, jobLogs, rewardLogs, token }: ManageSc
 
       const response = await fetch("/api/ops/airdrops", {
         body: JSON.stringify({
-          ownerWallet: token.ownerWallet,
+          ownerWallet: tokenState.ownerWallet,
           recipients,
-          tokenAddress: token.contractAddress
+          tokenAddress: tokenState.contractAddress
         }),
         headers: {
           "Content-Type": "application/json"
@@ -310,7 +442,7 @@ export function ManageScreen({ campaigns, jobLogs, rewardLogs, token }: ManageSc
           jobId: String(data.jobId),
           jobName: "airdrop.create",
           payload: {
-            tokenAddress: token.contractAddress
+            tokenAddress: tokenState.contractAddress
           },
           result: null,
           status: "queued",
@@ -338,8 +470,8 @@ export function ManageScreen({ campaigns, jobLogs, rewardLogs, token }: ManageSc
     try {
       const response = await fetch("/api/ops/insight-sync", {
         body: JSON.stringify({
-          chainId: token.chainId,
-          tokenAddress: token.contractAddress
+          chainId: tokenState.chainId,
+          tokenAddress: tokenState.contractAddress
         }),
         headers: {
           "Content-Type": "application/json"
@@ -362,7 +494,7 @@ export function ManageScreen({ campaigns, jobLogs, rewardLogs, token }: ManageSc
           jobId: String(data.jobId),
           jobName: "insight.sync",
           payload: {
-            tokenAddress: token.contractAddress
+            tokenAddress: tokenState.contractAddress
           },
           result: null,
           status: "queued",
@@ -391,7 +523,7 @@ export function ManageScreen({ campaigns, jobLogs, rewardLogs, token }: ManageSc
           <LanguageSwitcher />
           <Link
             className="inline-flex min-h-12 items-center justify-center rounded-full border border-white/70 bg-white/70 px-4 py-3 text-sm font-semibold text-ink/80 sm:min-h-0 sm:py-2"
-            href={`/tokens/${token.contractAddress}`}
+            href={`/tokens/${tokenState.contractAddress}`}
           >
             {copy.backToToken}
           </Link>
@@ -417,7 +549,7 @@ export function ManageScreen({ campaigns, jobLogs, rewardLogs, token }: ManageSc
         </Panel>
       </section>
 
-      <section className="mt-8 grid gap-6 lg:grid-cols-[1fr_1fr]">
+      <section className="mt-8 grid gap-6 xl:grid-cols-3">
         <Panel className="p-5 sm:p-6">
           <div className="mb-4 flex items-center gap-3">
             <Rocket className="h-6 w-6 text-candy" />
@@ -530,6 +662,111 @@ export function ManageScreen({ campaigns, jobLogs, rewardLogs, token }: ManageSc
 
         <Panel className="p-5 sm:p-6">
           <div className="mb-4 flex items-center gap-3">
+            <Coins className="h-6 w-6 text-sky" />
+            <h2 className="font-display text-3xl text-ink">{copy.liquidityTitle}</h2>
+          </div>
+
+          <div className="mb-4 rounded-[24px] border border-white/70 bg-white/70 p-4">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-xs uppercase tracking-[0.18em] text-ink/45">
+                  {copy.liquidityStatusLabel}
+                </p>
+                <p className="mt-2 text-base font-semibold text-ink">{liquidityStatusLabel}</p>
+              </div>
+              <Badge className={tokenState.buyEnabled ? "bg-mint/25 text-ink" : "bg-peach/35 text-ink"}>
+                {tokenState.buyEnabled ? copy.liquidityBuyOpen : copy.liquidityBuyClosed}
+              </Badge>
+            </div>
+            <div className="mt-4 space-y-2 text-sm text-ink/65">
+              <p>
+                <span className="font-semibold text-ink">{copy.liquidityPairLabel}:</span>{" "}
+                {tokenState.liquidityPairAddress
+                  ? shortenAddress(tokenState.liquidityPairAddress, 8, 6)
+                  : copy.liquidityMissing}
+              </p>
+              <p>
+                <span className="font-semibold text-ink">{copy.liquidityQuoteLabel}:</span> {liquidityQuoteText}
+              </p>
+              {tokenState.liquidityVerifiedAt ? (
+                <p>{formatDate(tokenState.liquidityVerifiedAt, intlLocale)}</p>
+              ) : null}
+            </div>
+            <div className="mt-4 flex flex-wrap gap-3">
+              {tokenState.liquidityPairAddress ? (
+                <a
+                  className="inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/85 px-4 py-3 text-sm font-semibold text-ink"
+                  href={`https://bscscan.com/address/${tokenState.liquidityPairAddress}`}
+                  rel="noreferrer"
+                  target="_blank"
+                >
+                  <ExternalLink className="h-4 w-4" />
+                  Pair
+                </a>
+              ) : null}
+              {tokenState.liquidityTxHash ? (
+                <a
+                  className="inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/85 px-4 py-3 text-sm font-semibold text-ink"
+                  href={`https://bscscan.com/tx/${tokenState.liquidityTxHash}`}
+                  rel="noreferrer"
+                  target="_blank"
+                >
+                  <ExternalLink className="h-4 w-4" />
+                  LP Tx
+                </a>
+              ) : null}
+            </div>
+          </div>
+
+          <form className="space-y-4" onSubmit={handleVerifyLiquidity}>
+            <div>
+              <label className="mb-2 block text-sm font-semibold text-ink/70">
+                {copy.liquidityPairLabel}
+              </label>
+              <Input
+                disabled={!isOwner || isVerifyingLiquidity}
+                onChange={(event) =>
+                  setLiquidityForm((current) => ({ ...current, pairAddress: event.target.value }))
+                }
+                placeholder="0x..."
+                required
+                value={liquidityForm.pairAddress}
+              />
+            </div>
+            <div>
+              <label className="mb-2 block text-sm font-semibold text-ink/70">
+                {copy.liquidityTxHashLabel}
+              </label>
+              <Input
+                disabled={!isOwner || isVerifyingLiquidity}
+                onChange={(event) =>
+                  setLiquidityForm((current) => ({ ...current, liquidityTxHash: event.target.value }))
+                }
+                placeholder="0x..."
+                value={liquidityForm.liquidityTxHash}
+              />
+            </div>
+            <p className="text-sm text-ink/55">{copy.liquidityHint}</p>
+
+            {liquidityMessage ? (
+              <div className="rounded-3xl border border-sky/25 bg-sky/10 px-4 py-3 text-sm text-ink">
+                {liquidityMessage}
+              </div>
+            ) : null}
+
+            <Button
+              className="w-full"
+              disabled={!isOwner || isVerifyingLiquidity}
+              type="submit"
+              variant="secondary"
+            >
+              {copy.liquidityButton}
+            </Button>
+          </form>
+        </Panel>
+
+        <Panel className="p-5 sm:p-6">
+          <div className="mb-4 flex items-center gap-3">
             <ShieldCheck className="h-6 w-6 text-mint" />
             <h2 className="font-display text-3xl text-ink">{copy.queueButton}</h2>
           </div>
@@ -576,7 +813,7 @@ export function ManageScreen({ campaigns, jobLogs, rewardLogs, token }: ManageSc
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <p className="text-sm font-semibold text-ink">
-                        {entry.amount} {token.symbol}
+                        {entry.amount} {tokenState.symbol}
                       </p>
                       <p className="mt-1 break-all text-xs text-ink/55">{entry.userWallet}</p>
                     </div>
@@ -623,7 +860,7 @@ export function ManageScreen({ campaigns, jobLogs, rewardLogs, token }: ManageSc
                       <div className="min-w-0">
                         <p className="text-sm font-semibold text-ink">{job.jobName}</p>
                         <p className="mt-1 text-xs text-ink/55">
-                          {shortenAddress(token.contractAddress, 8, 6)}
+                          {shortenAddress(tokenState.contractAddress, 8, 6)}
                         </p>
                       </div>
                       <Badge className="bg-sky/20 text-ink">{job.status}</Badge>

@@ -1,5 +1,7 @@
 import type { ObjectId } from "mongodb";
 
+export type LiquidityStatus = "pending" | "verified";
+
 export interface UserDocument {
   _id?: ObjectId;
   walletAddress: string;
@@ -26,6 +28,12 @@ export interface TokenDocument {
   deployedAt: Date;
   explorerUrl: string;
   imageUrl?: string | null;
+  liquidityPairAddress?: string | null;
+  liquidityQuoteTokenAddress?: string | null;
+  liquidityQuoteTokenSymbol?: string | null;
+  liquidityStatus?: LiquidityStatus | null;
+  liquidityTxHash?: string | null;
+  liquidityVerifiedAt?: Date | null;
   mintTxHash?: string | null;
   name: string;
   ownerWallet: string;
@@ -135,6 +143,12 @@ export interface PublicToken {
   deployedAt: string;
   explorerUrl: string;
   imageUrl?: string | null;
+  liquidityPairAddress?: string | null;
+  liquidityQuoteTokenAddress?: string | null;
+  liquidityQuoteTokenSymbol?: string | null;
+  liquidityStatus?: LiquidityStatus | null;
+  liquidityTxHash?: string | null;
+  liquidityVerifiedAt?: string | null;
   mintTxHash?: string | null;
   name: string;
   owner: PublicUser | null;

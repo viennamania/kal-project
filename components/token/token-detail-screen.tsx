@@ -47,6 +47,8 @@ const copyByLocale: Record<
     buyConnectedDescription: string;
     buyEyebrow: string;
     buyLoggedOutDescription: string;
+    buyPendingBody: string;
+    buyPendingTitle: string;
     buyTitle: string;
     campaignEmpty: string;
     campaignEyebrow: string;
@@ -54,6 +56,11 @@ const copyByLocale: Record<
     connectToBuy: string;
     descriptionFallback: string;
     explorerAction: string;
+    liquidityLabel: string;
+    liquidityMissing: string;
+    liquidityPending: string;
+    liquidityQuoteLabel: string;
+    liquidityVerified: string;
     manageAction: string;
     ownerLabel: string;
     buyUnavailableBody: string;
@@ -77,6 +84,9 @@ const copyByLocale: Record<
     buyConnectedDescription: "카드 결제나 보유 자산으로 이 토큰을 바로 받을 수 있습니다.",
     buyEyebrow: "구매하기",
     buyLoggedOutDescription: "구매를 시작하려면 먼저 전화번호 지갑을 연결해 주세요.",
+    buyPendingBody:
+      "pair는 등록되었지만 아직 reserve가 잡히지 않았습니다. PancakeSwap에 유동성이 반영된 뒤 다시 검증하면 구매가 열립니다.",
+    buyPendingTitle: "유동성 반영 대기 중",
     buyTitle: "이 토큰 받기",
     campaignEmpty: "아직 시작된 캠페인이 없습니다.",
     campaignEyebrow: "이벤트",
@@ -84,6 +94,11 @@ const copyByLocale: Record<
     connectToBuy: "지갑을 연결하면 구매 위젯이 열립니다.",
     descriptionFallback: "아직 등록된 토큰 설명이 없습니다.",
     explorerAction: "BscScan 보기",
+    liquidityLabel: "PancakeSwap LP",
+    liquidityMissing: "아직 미연결",
+    liquidityPending: "등록됨, 유동성 대기",
+    liquidityQuoteLabel: "상대 토큰",
+    liquidityVerified: "검증 완료",
     manageAction: "운영 센터",
     ownerLabel: "운영 지갑",
     buyUnavailableBody:
@@ -107,6 +122,9 @@ const copyByLocale: Record<
     buyConnectedDescription: "Buy this token directly with a card or supported crypto.",
     buyEyebrow: "Buy",
     buyLoggedOutDescription: "Connect your phone wallet before opening the buy flow.",
+    buyPendingBody:
+      "The pair is linked, but reserves are still zero. Re-run verification after liquidity is visible on PancakeSwap.",
+    buyPendingTitle: "Waiting for liquidity to appear",
     buyTitle: "Get this token",
     campaignEmpty: "No campaigns are running yet.",
     campaignEyebrow: "Campaigns",
@@ -114,6 +132,11 @@ const copyByLocale: Record<
     connectToBuy: "Connect a wallet to open the buy widget.",
     descriptionFallback: "No token description has been added yet.",
     explorerAction: "View on BscScan",
+    liquidityLabel: "PancakeSwap LP",
+    liquidityMissing: "Not linked yet",
+    liquidityPending: "Linked, waiting for reserves",
+    liquidityQuoteLabel: "Quote token",
+    liquidityVerified: "Verified",
     manageAction: "Manage center",
     ownerLabel: "Owner wallet",
     buyUnavailableBody:
@@ -137,6 +160,9 @@ const copyByLocale: Record<
     buyConnectedDescription: "カード決済や保有資産から、このトークンをすぐ受け取れます。",
     buyEyebrow: "購入",
     buyLoggedOutDescription: "購入を始めるには、先に電話番号ウォレットを接続してください。",
+    buyPendingBody:
+      "pair は登録されていますが、reserve がまだ 0 です。PancakeSwap に流動性が反映された後、再確認すると購入が開きます。",
+    buyPendingTitle: "流動性反映待ち",
     buyTitle: "このトークンを受け取る",
     campaignEmpty: "まだ開始されたキャンペーンはありません。",
     campaignEyebrow: "キャンペーン",
@@ -144,6 +170,11 @@ const copyByLocale: Record<
     connectToBuy: "ウォレットを接続すると購入ウィジェットが開きます。",
     descriptionFallback: "まだトークン説明は登録されていません。",
     explorerAction: "BscScanで見る",
+    liquidityLabel: "PancakeSwap LP",
+    liquidityMissing: "未連携",
+    liquidityPending: "登録済み、流動性待ち",
+    liquidityQuoteLabel: "相手トークン",
+    liquidityVerified: "確認済み",
     manageAction: "運営センター",
     ownerLabel: "運営ウォレット",
     buyUnavailableBody:
@@ -167,6 +198,9 @@ const copyByLocale: Record<
     buyConnectedDescription: "你可以直接用银行卡或现有加密资产购买这个代币。",
     buyEyebrow: "购买",
     buyLoggedOutDescription: "开始购买前，请先连接手机号钱包。",
+    buyPendingBody:
+      "pair 已经绑定，但 reserve 仍然为 0。等 PancakeSwap 上显示流动性后，再次验证即可开启购买。",
+    buyPendingTitle: "等待流动性生效",
     buyTitle: "获取这个代币",
     campaignEmpty: "还没有正在进行的活动。",
     campaignEyebrow: "活动",
@@ -174,6 +208,11 @@ const copyByLocale: Record<
     connectToBuy: "连接钱包后即可打开购买组件。",
     descriptionFallback: "暂时还没有填写代币说明。",
     explorerAction: "在 BscScan 查看",
+    liquidityLabel: "PancakeSwap LP",
+    liquidityMissing: "尚未绑定",
+    liquidityPending: "已绑定，等待流动性",
+    liquidityQuoteLabel: "报价代币",
+    liquidityVerified: "已验证",
     manageAction: "运营中心",
     ownerLabel: "运营钱包",
     buyUnavailableBody:
@@ -201,6 +240,25 @@ export function TokenDetailScreen({
     locale === "ko" ? "ko-KR" : locale === "ja" ? "ja-JP" : locale === "zh-CN" ? "zh-CN" : "en-US";
   const copy = copyByLocale[locale];
   const canBuyWithWidget = token.buyEnabled === true;
+  const liquidityStatusLabel =
+    token.liquidityStatus === "verified"
+      ? copy.liquidityVerified
+      : token.liquidityStatus === "pending"
+        ? copy.liquidityPending
+        : copy.liquidityMissing;
+  const liquidityMeta = token.liquidityPairAddress
+    ? token.liquidityQuoteTokenAddress
+      ? `${shortenAddress(token.liquidityPairAddress, 8, 6)} · ${
+          token.liquidityQuoteTokenSymbol
+            ? token.liquidityQuoteTokenSymbol
+            : shortenAddress(token.liquidityQuoteTokenAddress, 8, 6)
+        }`
+      : shortenAddress(token.liquidityPairAddress, 8, 6)
+    : copy.liquidityMissing;
+  const buyFallbackTitle =
+    token.liquidityStatus === "pending" ? copy.buyPendingTitle : copy.buyUnavailableTitle;
+  const buyFallbackBody =
+    token.liquidityStatus === "pending" ? copy.buyPendingBody : copy.buyUnavailableBody;
 
   const recentActivity = useMemo(() => {
       const transferItems = transferLogs.map((log) => ({
@@ -295,7 +353,7 @@ export function TokenDetailScreen({
               </div>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
               <Panel className="bg-bubble">
                 <p className="text-xs uppercase tracking-[0.18em] text-ink/45">{copy.ownerLabel}</p>
                 <p className="mt-3 text-sm font-semibold text-ink">
@@ -314,6 +372,14 @@ export function TokenDetailScreen({
                   {formatDate(token.deployedAt, intlLocale)}
                 </p>
                 <p className="mt-2 text-xs text-ink/45">{copy.receiveHint}</p>
+              </Panel>
+              <Panel className="bg-bubble">
+                <p className="text-xs uppercase tracking-[0.18em] text-ink/45">{copy.liquidityLabel}</p>
+                <p className="mt-3 text-sm font-semibold text-ink">{liquidityStatusLabel}</p>
+                <p className="mt-2 text-xs text-ink/45">{liquidityMeta}</p>
+                {token.liquidityVerifiedAt ? (
+                  <p className="mt-2 text-xs text-ink/45">{formatDate(token.liquidityVerifiedAt, intlLocale)}</p>
+                ) : null}
               </Panel>
             </div>
 
@@ -374,8 +440,8 @@ export function TokenDetailScreen({
           ) : (
             <Panel className="bg-bubble">
               <div className="rounded-[24px] border border-dashed border-white/70 bg-white/70 p-4">
-                <p className="text-base font-semibold text-ink">{copy.buyUnavailableTitle}</p>
-                <p className="mt-2 text-sm leading-6 text-ink/65">{copy.buyUnavailableBody}</p>
+                <p className="text-base font-semibold text-ink">{buyFallbackTitle}</p>
+                <p className="mt-2 text-sm leading-6 text-ink/65">{buyFallbackBody}</p>
               </div>
               <div className="mt-4 flex flex-wrap gap-3">
                 <Link

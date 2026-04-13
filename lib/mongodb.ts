@@ -50,6 +50,7 @@ async function ensureIndexes() {
         db.collection<UserDocument>("users").createIndex({ phone: 1 }),
         db.collection<TokenDocument>("tokens").createIndex({ contractAddress: 1 }, { unique: true }),
         db.collection<TokenDocument>("tokens").createIndex({ ownerWallet: 1 }),
+        db.collection<TokenDocument>("tokens").createIndex({ liquidityPairAddress: 1 }),
         db.collection<TokenDocument>("tokens").createIndex({ deployedAt: -1 }),
         db.collection<CampaignDocument>("campaigns").createIndex({ tokenAddress: 1, status: 1 }),
         db.collection<CampaignDocument>("campaigns").createIndex({ ownerWallet: 1, createdAt: -1 }),
