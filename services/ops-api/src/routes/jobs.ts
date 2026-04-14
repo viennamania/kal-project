@@ -28,6 +28,14 @@ const rewardSchema = z.object({
   walletAddress: z.string().trim().min(10)
 });
 
+const inviteClaimSchema = z.object({
+  amount: z.string().trim().min(1),
+  inviteClaimId: z.string().trim().min(1),
+  recipientWallet: z.string().trim().min(10),
+  senderWallet: z.string().trim().min(10),
+  tokenAddress: z.string().trim().min(10)
+});
+
 const insightSchema = z.object({
   chainId: z.number().int().default(56),
   tokenAddress: z.string().trim().min(10)
@@ -78,6 +86,43 @@ router.post("/jobs/rewards", async (request, response) => {
   }
 
   const job = await opsQueue.add("reward.issue", parsed.data);
+  return response.status(202).json({ jobId: job.id, status: "queued" });
+});
+
+router.post("/jobs/invite-claims", async (request, response) => {
+  const parsed = inviteClaimSchema.safeParse(request.body);
+
+  if (!parsed.success) {
+    return response.status(400).json({ error: "Invalid invite claim payload." });
+  }
+
+  const job = await opsQueue.add("invite-claim.deliver", parsed.data, {
+    attempts: 5,
+    backoff: {
+      delay: 3_000,
+      type: "exponential"
+    },
+    removeOnComplete: 1_000,
+    removeOnFail: 3_000
+  });
+
+  const { jobLogs } = await getCollections();
+  await jobLogs.updateOne(
+    { jobId: String(job.id) },
+    {
+      $set: {
+        jobName: job.name,
+        payload: parsed.data,
+        status: "queued",
+        updatedAt: new Date()
+      },
+      $setOnInsert: {
+        createdAt: new Date()
+      }
+    },
+    { upsert: true }
+  );
+
   return response.status(202).json({ jobId: job.id, status: "queued" });
 });
 

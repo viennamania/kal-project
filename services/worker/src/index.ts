@@ -1,7 +1,9 @@
 import { Worker } from "bullmq";
+import { ObjectId } from "mongodb";
 
 import { getCollections } from "./db/collections.js";
 import { processAirdrop } from "./processors/airdrop.js";
+import { processInviteClaim } from "./processors/invite-claim.js";
 import { processInsightSync } from "./processors/insight-sync.js";
 import { processReward } from "./processors/reward.js";
 import { OPS_QUEUE_NAME } from "./queues/jobs.js";
@@ -32,6 +34,9 @@ const worker = new Worker(
     switch (job.name) {
       case "airdrop.create":
         result = await processAirdrop(job.data as Parameters<typeof processAirdrop>[0]);
+        break;
+      case "invite-claim.deliver":
+        result = await processInviteClaim(job.data as Parameters<typeof processInviteClaim>[0]);
         break;
       case "reward.issue":
         result = await processReward(job.data as Parameters<typeof processReward>[0]);
@@ -65,7 +70,7 @@ worker.on("failed", async (job, error) => {
     return;
   }
 
-  const { jobLogs } = await getCollections();
+  const { inviteClaims, jobLogs } = await getCollections();
   await jobLogs.updateOne(
     { jobId: String(job.id) },
     {
@@ -76,6 +81,23 @@ worker.on("failed", async (job, error) => {
       }
     }
   );
+
+  if (
+    job.name === "invite-claim.deliver" &&
+    typeof job.data?.inviteClaimId === "string" &&
+    job.data.inviteClaimId.length > 0
+  ) {
+    await inviteClaims.updateOne(
+      { _id: new ObjectId(job.data.inviteClaimId) },
+      {
+        $set: {
+          errorMessage: error.message,
+          status: "failed",
+          updatedAt: new Date()
+        }
+      }
+    ).catch(() => undefined);
+  }
 });
 
 console.log("worker listening for jobs");

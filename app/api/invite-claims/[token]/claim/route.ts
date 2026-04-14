@@ -9,6 +9,7 @@ import {
   resolveInviteClaimStatus
 } from "@/lib/invite-claims";
 import { getCollections } from "@/lib/mongodb";
+import { enqueueOpsJob } from "@/lib/ops-client";
 import { toPublicInviteClaim } from "@/lib/serializers";
 
 export const runtime = "nodejs";
@@ -16,10 +17,10 @@ export const runtime = "nodejs";
 export async function POST(
   _request: Request,
   { params }: { params: { token: string } }
-) {
-  try {
-    const session = requireAuthenticatedWallet();
-    const { inviteClaims, jobLogs, users } = await getCollections();
+  ) {
+    try {
+      const session = requireAuthenticatedWallet();
+    const { inviteClaims, users } = await getCollections();
     const inviteClaim = await findInviteClaimByPublicToken(inviteClaims, params.token);
 
     if (!inviteClaim) {
@@ -42,10 +43,13 @@ export async function POST(
       return NextResponse.json({ error: "This invite claim has expired." }, { status: 410 });
     }
 
-    if (
-      resolvedStatus !== "pending" &&
-      !(resolvedStatus === "processing" && inviteClaim.claimedByWallet === session.address)
-    ) {
+    if (resolvedStatus === "processing" && inviteClaim.claimedByWallet === session.address) {
+      return NextResponse.json({
+        inviteClaim: toPublicInviteClaim(inviteClaim)
+      });
+    }
+
+    if (resolvedStatus !== "pending") {
       return NextResponse.json(
         { error: "This invite claim is no longer available." },
         { status: 409 }
@@ -71,40 +75,27 @@ export async function POST(
 
     const now = new Date();
 
+    const enqueued = await enqueueOpsJob("/jobs/invite-claims", {
+      amount: inviteClaim.amount,
+      inviteClaimId: inviteClaim._id?.toString(),
+      recipientWallet: session.address,
+      senderWallet: inviteClaim.senderWallet,
+      tokenAddress: inviteClaim.tokenAddress
+    });
+
     await inviteClaims.updateOne(
       { _id: inviteClaim._id },
       {
         $set: {
           claimedAt: inviteClaim.claimedAt ?? now,
           claimedByWallet: session.address,
+          deliveryTransactionId: null,
           deliveryRequestedAt: now,
           errorMessage: null,
           status: "processing",
           updatedAt: now
         }
       }
-    );
-
-    await jobLogs.updateOne(
-      { jobId: `invite-claim:${inviteClaim._id?.toString()}` },
-      {
-        $set: {
-          jobName: "invite-claim.deliver",
-          payload: {
-            amount: inviteClaim.amount,
-            inviteClaimId: inviteClaim._id?.toString(),
-            recipientWallet: session.address,
-            senderWallet: inviteClaim.senderWallet,
-            tokenAddress: inviteClaim.tokenAddress
-          },
-          status: "queued",
-          updatedAt: now
-        },
-        $setOnInsert: {
-          createdAt: now
-        }
-      },
-      { upsert: true }
     );
 
     const updatedClaim = await inviteClaims.findOne({ _id: inviteClaim._id });
@@ -117,7 +108,8 @@ export async function POST(
     }
 
     return NextResponse.json({
-      inviteClaim: toPublicInviteClaim(updatedClaim)
+      inviteClaim: toPublicInviteClaim(updatedClaim),
+      jobId: enqueued.jobId
     });
   } catch (error) {
     return authErrorResponse(error);

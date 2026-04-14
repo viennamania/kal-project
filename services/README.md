@@ -31,6 +31,12 @@ Optional later, if you decide to automate onchain distribution with thirdweb Eng
 - `THIRDWEB_ENGINE_URL`
 - `THIRDWEB_ENGINE_ACCESS_TOKEN`
 
+For Engine server wallet based distribution in `worker`:
+
+- `THIRDWEB_ENGINE_SERVER_WALLET_ADDRESS`
+- `THIRDWEB_ENGINE_SMART_WALLET_ADDRESS`
+- `THIRDWEB_ENGINE_VAULT_ACCESS_TOKEN` (optional)
+
 Suggested Railway layout:
 
 1. Create `redis`

@@ -2,6 +2,7 @@ export const OPS_QUEUE_NAME = "ops-jobs";
 
 export type JobName =
   | "airdrop.create"
+  | "invite-claim.deliver"
   | "reward.issue"
   | "insight.sync"
   | "campaign.close"
@@ -23,6 +24,14 @@ export type RewardIssueJob = {
   reason: "attendance" | "mission" | "referral";
   tokenAddress: string;
   walletAddress: string;
+};
+
+export type InviteClaimDeliverJob = {
+  amount: string;
+  inviteClaimId: string;
+  recipientWallet: string;
+  senderWallet: string;
+  tokenAddress: string;
 };
 
 export type InsightSyncJob = {

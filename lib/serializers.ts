@@ -150,6 +150,7 @@ export function toPublicInviteClaim(inviteClaim: InviteClaimDocument): PublicInv
     claimedAt: inviteClaim.claimedAt?.toISOString() ?? null,
     claimedByWallet: inviteClaim.claimedByWallet ?? null,
     createdAt: inviteClaim.createdAt.toISOString(),
+    deliveryTransactionId: inviteClaim.deliveryTransactionId ?? null,
     deliveryRequestedAt: inviteClaim.deliveryRequestedAt?.toISOString() ?? null,
     errorMessage: inviteClaim.errorMessage ?? null,
     expiresAt: inviteClaim.expiresAt.toISOString(),

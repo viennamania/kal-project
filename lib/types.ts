@@ -126,6 +126,7 @@ export interface InviteClaimDocument {
   claimedAt?: Date | null;
   claimedByWallet?: string | null;
   createdAt: Date;
+  deliveryTransactionId?: string | null;
   deliveryRequestedAt?: Date | null;
   errorMessage?: string | null;
   expiresAt: Date;
@@ -251,6 +252,7 @@ export interface PublicInviteClaim {
   claimedAt?: string | null;
   claimedByWallet?: string | null;
   createdAt: string;
+  deliveryTransactionId?: string | null;
   deliveryRequestedAt?: string | null;
   errorMessage?: string | null;
   expiresAt: string;

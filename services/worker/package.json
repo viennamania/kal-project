@@ -12,6 +12,7 @@
     "bullmq": "^5.56.1",
     "ioredis": "^5.6.1",
     "mongodb": "^6.17.0",
+    "thirdweb": "^5.110.0",
     "zod": "^3.24.4"
   },
   "devDependencies": {
