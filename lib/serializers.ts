@@ -1,8 +1,10 @@
 import type {
   CampaignDocument,
   InsightTransferLogDocument,
+  InviteClaimDocument,
   JobLogDocument,
   PublicCampaign,
+  PublicInviteClaim,
   PublicJobLog,
   PublicRewardLog,
   PublicToken,
@@ -13,6 +15,7 @@ import type {
   TransferLogDocument,
   UserDocument
 } from "@/lib/types";
+import { buildInviteClaimShareUrl, resolveInviteClaimStatus } from "@/lib/invite-claims";
 import { maskPhone } from "@/lib/utils";
 
 export function toPublicUser(user: UserDocument): PublicUser {
@@ -137,5 +140,29 @@ export function toPublicJobLog(jobLog: JobLogDocument): PublicJobLog {
     errorMessage: jobLog.errorMessage ?? null,
     createdAt: jobLog.createdAt.toISOString(),
     updatedAt: jobLog.updatedAt.toISOString()
+  };
+}
+
+export function toPublicInviteClaim(inviteClaim: InviteClaimDocument): PublicInviteClaim {
+  return {
+    amount: inviteClaim.amount,
+    claimTxHash: inviteClaim.claimTxHash ?? null,
+    claimedAt: inviteClaim.claimedAt?.toISOString() ?? null,
+    claimedByWallet: inviteClaim.claimedByWallet ?? null,
+    createdAt: inviteClaim.createdAt.toISOString(),
+    deliveryRequestedAt: inviteClaim.deliveryRequestedAt?.toISOString() ?? null,
+    errorMessage: inviteClaim.errorMessage ?? null,
+    expiresAt: inviteClaim.expiresAt.toISOString(),
+    fundingTxHash: inviteClaim.fundingTxHash ?? null,
+    id: inviteClaim._id?.toString() ?? "",
+    senderDisplayName: inviteClaim.senderDisplayName ?? null,
+    senderWallet: inviteClaim.senderWallet,
+    shareUrl: buildInviteClaimShareUrl(inviteClaim._id?.toString() ?? ""),
+    status: resolveInviteClaimStatus(inviteClaim),
+    targetPhoneMasked: inviteClaim.targetPhoneMasked,
+    tokenAddress: inviteClaim.tokenAddress,
+    tokenName: inviteClaim.tokenName,
+    tokenSymbol: inviteClaim.tokenSymbol,
+    updatedAt: inviteClaim.updatedAt.toISOString()
   };
 }

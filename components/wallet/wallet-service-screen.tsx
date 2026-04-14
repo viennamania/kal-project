@@ -22,6 +22,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Panel } from "@/components/ui/panel";
+import { InviteClaimPanel } from "@/components/wallet/invite-claim-panel";
 import { formatMessage, getIntlLocale } from "@/lib/i18n";
 import { appChain, thirdwebClient } from "@/lib/thirdweb";
 import type { PublicToken, PublicUser } from "@/lib/types";
@@ -516,6 +517,8 @@ export function WalletServiceScreen() {
               </Button>
             </form>
           </Panel>
+
+          <InviteClaimPanel balances={balances} tokens={tokens} />
         </div>
       </section>
     </main>

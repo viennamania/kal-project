@@ -1,6 +1,13 @@
 import type { ObjectId } from "mongodb";
 
 export type LiquidityStatus = "pending" | "verified";
+export type InviteClaimStatus =
+  | "cancelled"
+  | "delivered"
+  | "expired"
+  | "failed"
+  | "pending"
+  | "processing";
 
 export interface UserDocument {
   _id?: ObjectId;
@@ -112,6 +119,28 @@ export interface GasLogDocument {
   createdAt: Date;
 }
 
+export interface InviteClaimDocument {
+  _id?: ObjectId;
+  amount: string;
+  claimTxHash?: string | null;
+  claimedAt?: Date | null;
+  claimedByWallet?: string | null;
+  createdAt: Date;
+  deliveryRequestedAt?: Date | null;
+  errorMessage?: string | null;
+  expiresAt: Date;
+  fundingTxHash?: string | null;
+  senderDisplayName?: string | null;
+  senderWallet: string;
+  status: InviteClaimStatus;
+  targetPhoneHash: string;
+  targetPhoneMasked: string;
+  tokenAddress: string;
+  tokenName: string;
+  tokenSymbol: string;
+  updatedAt: Date;
+}
+
 export interface JobLogDocument {
   _id?: ObjectId;
   jobId: string;
@@ -213,5 +242,27 @@ export interface PublicJobLog {
   result?: Record<string, unknown> | null;
   errorMessage?: string | null;
   createdAt: string;
+  updatedAt: string;
+}
+
+export interface PublicInviteClaim {
+  amount: string;
+  claimTxHash?: string | null;
+  claimedAt?: string | null;
+  claimedByWallet?: string | null;
+  createdAt: string;
+  deliveryRequestedAt?: string | null;
+  errorMessage?: string | null;
+  expiresAt: string;
+  fundingTxHash?: string | null;
+  id: string;
+  senderDisplayName?: string | null;
+  senderWallet: string;
+  shareUrl: string;
+  status: InviteClaimStatus;
+  targetPhoneMasked: string;
+  tokenAddress: string;
+  tokenName: string;
+  tokenSymbol: string;
   updatedAt: string;
 }
