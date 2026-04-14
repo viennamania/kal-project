@@ -73,3 +73,23 @@ export function normalizePhone(phone?: string | null) {
   const normalized = phone.trim().replace(/[^\d+]/g, "");
   return normalized.length > 0 ? normalized : null;
 }
+
+export function formatPhoneInputValue(phone?: string | null) {
+  const normalized = normalizePhone(phone);
+
+  if (!normalized) {
+    return "";
+  }
+
+  const digits = normalized.replace(/\D/g, "");
+
+  if (digits.startsWith("82") && digits.length > 2) {
+    return `0${digits.slice(2)}`;
+  }
+
+  if (normalized.startsWith("+")) {
+    return `+${digits}`;
+  }
+
+  return digits;
+}

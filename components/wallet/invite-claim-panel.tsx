@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Panel } from "@/components/ui/panel";
 import { formatMessage, getIntlLocale } from "@/lib/i18n";
 import type { PublicInviteClaim, PublicToken } from "@/lib/types";
-import { formatDate, shortenAddress } from "@/lib/utils";
+import { formatDate, formatPhoneInputValue, shortenAddress } from "@/lib/utils";
 
 type TokenBalance = {
   displayValue: string;
@@ -52,9 +52,11 @@ export function InviteClaimPanel({
   const wallet = dictionary.wallet;
   const intlLocale = getIntlLocale(locale);
   const [amount, setAmount] = useState("");
+  const [isContactPickerAvailable, setIsContactPickerAvailable] = useState(false);
   const [inviteClaims, setInviteClaims] = useState<PublicInviteClaim[]>([]);
   const [isCreating, setIsCreating] = useState(false);
   const [isLoadingClaims, setIsLoadingClaims] = useState(false);
+  const [isPickingContact, setIsPickingContact] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [phone, setPhone] = useState("");
   const [selectedTokenAddress, setSelectedTokenAddress] = useState("");
@@ -63,6 +65,43 @@ export function InviteClaimPanel({
   useEffect(() => {
     setSelectedTokenAddress((current) => current || tokens[0]?.contractAddress || "");
   }, [tokens]);
+
+  useEffect(() => {
+    let ignore = false;
+
+    async function checkContactPickerSupport() {
+      if (
+        typeof window === "undefined" ||
+        !window.isSecureContext ||
+        !("contacts" in navigator) ||
+        !("ContactsManager" in window) ||
+        typeof navigator.contacts?.select !== "function"
+      ) {
+        if (!ignore) {
+          setIsContactPickerAvailable(false);
+        }
+        return;
+      }
+
+      try {
+        const properties = await navigator.contacts.getProperties();
+
+        if (!ignore) {
+          setIsContactPickerAvailable(properties.includes("tel"));
+        }
+      } catch {
+        if (!ignore) {
+          setIsContactPickerAvailable(true);
+        }
+      }
+    }
+
+    void checkContactPickerSupport();
+
+    return () => {
+      ignore = true;
+    };
+  }, []);
 
   useEffect(() => {
     let ignore = false;
@@ -119,6 +158,39 @@ export function InviteClaimPanel({
       setMessage(wallet.inviteCopied);
     } catch {
       setMessage(url);
+    }
+  }
+
+  async function handlePickContactPhone() {
+    if (!navigator.contacts?.select) {
+      setMessage(wallet.inviteContactUnavailable);
+      return;
+    }
+
+    setIsPickingContact(true);
+    setMessage(null);
+
+    try {
+      const contacts = await navigator.contacts.select(["tel"], {
+        multiple: false
+      });
+      const selectedPhone = contacts.flatMap((contact) => contact.tel ?? []).find(Boolean);
+
+      if (!selectedPhone) {
+        setMessage(wallet.inviteContactMissingPhone);
+        return;
+      }
+
+      setPhone(formatPhoneInputValue(selectedPhone));
+      setMessage(wallet.inviteContactReady);
+    } catch (error) {
+      if (error instanceof Error && error.name === "AbortError") {
+        return;
+      }
+
+      setMessage(wallet.inviteContactFailed);
+    } finally {
+      setIsPickingContact(false);
     }
   }
 
@@ -219,15 +291,32 @@ export function InviteClaimPanel({
         </div>
 
         <div>
-          <label className="mb-2 block text-sm font-semibold text-ink/70">
-            {wallet.invitePhoneLabel}
-          </label>
+          <div className="mb-2 flex items-center justify-between gap-3">
+            <label className="block text-sm font-semibold text-ink/70">
+              {wallet.invitePhoneLabel}
+            </label>
+            {isContactPickerAvailable ? (
+              <Button
+                className="px-4 py-2 text-xs"
+                disabled={isPickingContact}
+                onClick={() => void handlePickContactPhone()}
+                type="button"
+                variant="ghost"
+              >
+                {isPickingContact ? wallet.inviteContactPicking : wallet.inviteContactButton}
+              </Button>
+            ) : null}
+          </div>
           <Input
+            autoComplete="tel-national"
             inputMode="tel"
             onChange={(event) => setPhone(event.target.value)}
             placeholder={wallet.invitePhonePlaceholder}
             value={phone}
           />
+          {isContactPickerAvailable ? (
+            <p className="mt-2 text-xs text-ink/50">{wallet.inviteContactHint}</p>
+          ) : null}
         </div>
 
         <div>
